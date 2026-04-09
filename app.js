@@ -726,79 +726,124 @@ function saveAccForm() {
     return;
   }
   
-  // 验证密码
-  if (!pw1) {
-    if (errEl) { errEl.textContent = '请输入密码'; errEl.style.display = 'block'; }
-    return;
-  }
-  if (pw1.length < 6) {
-    if (errEl) { errEl.textContent = '密码至少6位'; errEl.style.display = 'block'; }
-    return;
-  }
-  if (pw1 !== pw2) {
-    if (errEl) { errEl.textContent = '两次密码不一致'; errEl.style.display = 'block'; }
-    return;
-  }
-  
-  // 使用 Firebase Auth 创建用户
+  // 使用 Firebase Auth
   if (!auth) {
     if (errEl) { errEl.textContent = 'Firebase Auth 未初始化'; errEl.style.display = 'block'; }
     return;
   }
   
-  // 保存当前登录用户（管理员）
-  var currentAdmin = auth.currentUser;
-  
-  // 创建新用户
-  auth.createUserWithEmailAndPassword(email, pw1)
-    .then(function(userCredential) {
-      var newUser = userCredential.user;
-      var uid = newUser.uid;
-      
-      // 在数据库中保存用户角色信息
-      var userData = {
-        email: email,
-        role: role,
-        createdAt: firebase.database.ServerValue.TIMESTAMP,
-        createdBy: currentAdmin ? currentAdmin.uid : null
-      };
-      
-      return db.ref('cpms_users/' + uid).set(userData).then(function() {
-        // 同时更新本地用户列表（用于显示）
-        u[email] = { role: role, uid: uid };
-        setUsers(u);
+  // 判断是创建新用户还是编辑现有用户
+  if (accEditTarget === null) {
+    // ========== 创建新用户 ==========
+    
+    // 验证密码（创建时必须提供）
+    if (!pw1) {
+      if (errEl) { errEl.textContent = '请输入密码'; errEl.style.display = 'block'; }
+      return;
+    }
+    if (pw1.length < 6) {
+      if (errEl) { errEl.textContent = '密码至少6位'; errEl.style.display = 'block'; }
+      return;
+    }
+    if (pw1 !== pw2) {
+      if (errEl) { errEl.textContent = '两次密码不一致'; errEl.style.display = 'block'; }
+      return;
+    }
+    
+    // 保存当前登录用户（管理员）
+    var currentAdmin = auth.currentUser;
+    
+    // 创建新用户
+    auth.createUserWithEmailAndPassword(email, pw1)
+      .then(function(userCredential) {
+        var newUser = userCredential.user;
+        var uid = newUser.uid;
         
-        toast('账号 ' + email + ' 已创建', 'ok');
+        // 在数据库中保存用户角色信息
+        var userData = {
+          email: email,
+          role: role,
+          createdAt: firebase.database.ServerValue.TIMESTAMP,
+          createdBy: currentAdmin ? currentAdmin.uid : null
+        };
+        
+        return db.ref('cpms_users/' + uid).set(userData).then(function() {
+          toast('账号 ' + email + ' 已创建', 'ok');
+          cancelAccForm();
+          renderAccList();
+          
+          // 重新登录为管理员（因为 createUser 会自动登录为新用户）
+          if (currentAdmin) {
+            alert('账号创建成功！\n\n注意：由于 Firebase Auth 限制，您已被切换到新创建的账号。\n请退出并使用管理员账号重新登录。');
+          }
+        });
+      })
+      .catch(function(err) {
+        var msg = '创建失败';
+        if (err.code === 'auth/email-already-in-use') msg = '邮箱已被注册';
+        else if (err.code === 'auth/invalid-email') msg = '邮箱格式错误';
+        else if (err.code === 'auth/weak-password') msg = '密码至少6位';
+        else if (err.message) msg = err.message;
+        if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+      });
+      
+  } else {
+    // ========== 编辑现有用户 ==========
+    var uid = accEditTarget;
+    var userData = u[uid];
+    
+    if (!userData) {
+      if (errEl) { errEl.textContent = '用户不存在'; errEl.style.display = 'block'; }
+      return;
+    }
+    
+    // 更新角色
+    var updates = {
+      role: role,
+      updatedAt: firebase.database.ServerValue.TIMESTAMP
+    };
+    
+    // 如果有输入密码，则更新密码
+    if (pw1) {
+      if (pw1.length < 6) {
+        if (errEl) { errEl.textContent = '密码至少6位'; errEl.style.display = 'block'; }
+        return;
+      }
+      if (pw1 !== pw2) {
+        if (errEl) { errEl.textContent = '两次密码不一致'; errEl.style.display = 'block'; }
+        return;
+      }
+      
+      // 注意：客户端无法直接修改其他用户的密码
+      // 这需要 Admin SDK 或云函数
+      // 这里只更新角色信息，密码修改需要单独处理
+      alert('密码修改功能需要管理员权限，请联系系统管理员或使用 Firebase Console。');
+    }
+    
+    // 更新数据库中的角色
+    db.ref('cpms_users/' + uid).update(updates)
+      .then(function() {
+        toast('账号 ' + email + ' 已更新', 'ok');
         cancelAccForm();
         renderAccList();
-        
-        // 重新登录为管理员（因为 createUser 会自动登录为新用户）
-        // 注意：这里需要管理员重新登录，或者使用 Admin SDK
-        // 客户端暂时无法自动切回管理员，需要提示
-        if (currentAdmin) {
-          alert('账号创建成功！\n\n注意：由于 Firebase Auth 限制，您已被切换到新创建的账号。\n请退出并使用管理员账号重新登录。');
-        }
+      })
+      .catch(function(err) {
+        var msg = '更新失败';
+        if (err.message) msg = err.message;
+        if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
       });
-    })
-    .catch(function(err) {
-      var msg = '创建失败';
-      if (err.code === 'auth/email-already-in-use') msg = '邮箱已被注册';
-      else if (err.code === 'auth/invalid-email') msg = '邮箱格式错误';
-      else if (err.code === 'auth/weak-password') msg = '密码至少6位';
-      else if (err.message) msg = err.message;
-      if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
-    });
+  }
 }
 
-function deleteAcc(username) {
+function deleteAcc(uid) {
   // 只有管理员可以删除
   if (!isAdmin()) {
     alert('只有管理员可以删除账号');
     return;
   }
   
-  if (username === currentUser) {
-    alert('不能删除当前账号');
+  if (uid === currentUserUid) {
+    alert('不能删除当前登录的账号');
     return;
   }
   var u = getUsers();
@@ -808,9 +853,16 @@ function deleteAcc(username) {
   }
   if (!confirm('确定删除账号 ' + username + '?')) return;
   
-  delete u[username];
+  var userData = u[uid];
+  var userEmail = userData && userData.email ? userData.email : uid;
+  
+  delete u[uid];
   setUsers(u);
-  toast('账号 ' + username + ' 已删除', 'ok');
+  
+  // 同时从 Firebase 删除
+  db.ref('cpms_users/' + uid).remove().catch(function() {});
+  
+  toast('账号 ' + userEmail + ' 已删除', 'ok');
   renderAccList();
 }
 
