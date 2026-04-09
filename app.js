@@ -12,6 +12,14 @@ var FIREBASE_AUTH_CONFIG = {
   appId: '1:376445767246:web:aef8404177b4608cbd3d1f'
 };
 
+const DEFAULT_BAYS = [80, 81, 83, 84, 85];
+const DEFAULT_RATE = 230;
+const SK = 'cpms_v2';
+const STORAGE_KEY = 'cpms_bays';
+const LOGIN_KEY = 'cpms_logged_in';
+const USERS_KEY = 'cpms_users';
+const RATE_KEY = 'cpms_bay_rates';
+
 // Firebase Auth state
 var firebaseAuthReady = false;
 var auth = null;
@@ -32,7 +40,27 @@ var dbRef = null;
 var settingsRef = null;
 var connected = false;
 var BAYS = DEFAULT_BAYS.slice();
-var acIdx = {};// ============================================================
+var acIdx = {};
+
+// ============================================================
+// BAY SETTINGS HELPERS
+// ============================================================
+function getBayRates() {
+  try {
+    return JSON.parse(localStorage.getItem(RATE_KEY)) || {};
+  } catch (e) {
+    return {};
+  }
+}
+function saveBayRates(obj) {
+  localStorage.setItem(RATE_KEY, JSON.stringify(obj));
+  if (settingsRef) settingsRef.child('bayRates').set(obj);
+}
+function getRate(bayId) {
+  var rates = getBayRates();
+  return rates[bayId] !== undefined ? rates[bayId] : DEFAULT_RATE;
+}
+// ============================================================
 // FIREBASE AUTH
 // ============================================================
 (function() {
