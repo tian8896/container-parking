@@ -751,8 +751,9 @@ function hideAc(id) {
 }
 
 // ============================================================
+function startApp() {
   if (!firebaseReady) {
-    setTimeout(initFirebase, 200);
+    setTimeout(startApp, 200);
     return;
   }
   initApp();
