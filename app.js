@@ -52,7 +52,19 @@ function initUsersRef() {
   if (!usersRef && db) {
     usersRef = db.ref('cpms_users');
     usersRef.on('value', function(snap) {
-      cachedUsers = snap.val() || {};
+      var fbUsers = snap.val() || {};
+      // 转换 Firebase 数据格式（UID为键）到本地格式
+      cachedUsers = {};
+      Object.keys(fbUsers).forEach(function(uid) {
+        var userData = fbUsers[uid];
+        cachedUsers[uid] = {
+          email: userData.email || '',
+          role: userData.role || 'user',
+          uid: uid
+        };
+      });
+      // 同步到本地存储
+      localStorage.setItem(USERS_KEY, JSON.stringify(cachedUsers));
       // 更新界面
       if (document.getElementById('accList')) {
         renderAccList();
@@ -851,10 +863,10 @@ function deleteAcc(uid) {
     alert('至少保留1个账号');
     return;
   }
-  if (!confirm('确定删除账号 ' + username + '?')) return;
-  
   var userData = u[uid];
   var userEmail = userData && userData.email ? userData.email : uid;
+  
+  if (!confirm('确定删除账号 ' + userEmail + '?')) return;
   
   delete u[uid];
   setUsers(u);
