@@ -292,11 +292,18 @@ tr:hover td{background:rgba(247,129,102,.03)}
       </div>
     </div>
 
-    <div id="set-panel-acc" style="display:none"><div style="padding:8px 12px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:5px;color:#0066cc;font-size:12px;margin-bottom:12px">🔐 只有管理员可以添加和管理用户账号</div><div id="accList">加载中...</div><div class="bay-settings-buttons" style="margin-top:16px"><button class="btn-cancel" onclick="closeBaySettings()">✕ 关闭 Close</button></div></div>
+    <!-- Account management panel -->
+    <div id="set-panel-acc" style="display:none">
+      <div id="accAdminHint"></div>
+      <div id="accList">加载中...</div>
+      <div class="bay-settings-buttons" style="margin-top:16px">
+        <button class="btn-cancel" onclick="closeBaySettings()">✕ 关闭 Close</button>
+      </div>
     </div>
 
     <!-- Fee settings panel -->
     <div id="set-panel-fee" style="display:none">
+      <div id="feeAdminHint"></div>
       <div id="bayRateList"></div>
       <div class="bay-settings-buttons" style="margin-top:16px">
         <button class="btn-save admin-only" id="saveFeeBtn" onclick="saveFeeSettings()">💾 保存 Save</button>
@@ -516,6 +523,6 @@ tr:hover td{background:rgba(247,129,102,.03)}
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><script src="app.js?v=10"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><script src="app.js?v=11"></script>
 </body>
 </html>

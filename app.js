@@ -498,10 +498,18 @@ function renderAccList() {
   var u = getUsers();
   var names = Object.keys(u);
   var el = document.getElementById('accList');
+  var hintEl = document.getElementById('accAdminHint');
   if (!el) return;
   
   var h = '';
   var isAdm = isAdmin();
+  
+  // 权限提示
+  if (hintEl) {
+    hintEl.innerHTML = isAdm
+      ? '<div style="padding:8px 12px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:5px;color:#0066cc;font-size:12px;margin-bottom:12px">👤 管理员可以添加和管理用户账号</div>'
+      : '<div style="padding:8px 12px;background:#fff3cd;border:1px solid #ffc107;border-radius:5px;color:#856404;font-size:12px;margin-bottom:12px">⚠️ 只有管理员可以管理账号</div>';
+  }
   
   // 统计信息
   var totalUsers = names.length;
@@ -813,7 +821,15 @@ function loadFeePanel() {
   var rates = getBayRates();
   var isAdm = isAdmin();
   var el = document.getElementById('bayRateList');
+  var hintEl = document.getElementById('feeAdminHint');
   if (!el) return;
+  
+  // 权限提示
+  if (hintEl) {
+    hintEl.innerHTML = isAdm
+      ? '<div style="padding:8px 12px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:5px;color:#0066cc;font-size:12px;margin-bottom:12px">👤 管理员可以修改计费设置</div>'
+      : '<div style="padding:8px 12px;background:#fff3cd;border:1px solid #ffc107;border-radius:5px;color:#856404;font-size:12px;margin-bottom:12px">⚠️ 只有管理员可以修改计费设置</div>';
+  }
   
   var h = '';
   
@@ -823,10 +839,6 @@ function loadFeePanel() {
   h += '<div class="stat-item"><span class="stat-value">' + BAYS.length + '</span><span class="stat-label">停车位总数</span></div>';
   h += '<div class="stat-item"><span class="stat-value">' + DEFAULT_RATE + '</span><span class="stat-label">默认单价 (AED/天)</span></div>';
   h += '</div>';
-  
-  if (!isAdm) {
-    h += '<div class="settings-hint warning"><span class="hint-icon">⚠️</span><span class="hint-text">只有管理员可以修改计费设置</span></div>';
-  }
   h += '</div>';
   
   // 费率列表
