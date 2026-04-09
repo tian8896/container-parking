@@ -483,20 +483,56 @@ function renderAccList() {
   var h = '';
   var isAdm = isAdmin();
   
+  // 统计信息
+  var totalUsers = names.length;
+  var onlineUsers = names.filter(function(n) { return u[n] && u[n].online; }).length;
+  
+  // 头部信息栏
+  h += '<div class="settings-header">';
+  h += '<div class="settings-stats">';
+  h += '<div class="stat-item"><span class="stat-value">' + totalUsers + '</span><span class="stat-label">总用户数</span></div>';
+  h += '<div class="stat-item"><span class="stat-value">' + (isAdm ? '管理员' : '普通用户') + '</span><span class="stat-label">当前权限</span></div>';
+  h += '</div>';
+  
   // 只有管理员可以添加账号
   if (isAdm) {
-    h = '<button class="acc-add-btn" onclick="showAccForm(null)">+ 添加新账号</button>';
+    h += '<button class="settings-add-btn" onclick="showAccForm(null)"><span class="btn-icon">+</span><span class="btn-text">添加新账号</span></button>';
   } else {
-    h = '<div style="padding:12px;background:#fff3cd;border:1px solid #ffc107;border-radius:5px;color:#856404;margin-bottom:12px;font-size:13px">⚠️ 只有管理员可以管理账号</div>';
+    h += '<div class="settings-hint warning"><span class="hint-icon">⚠️</span><span class="hint-text">只有管理员可以管理账号</span></div>';
   }
+  h += '</div>';
   
-  names.forEach(function(name) {
-    var isYou = name === currentUser;
-    // 普通用户只能查看，不能编辑或删除
-    var editBtn = isAdm ? '<button class="acc-edit-btn" onclick="showAccForm(\'' + name + '\')">Edit</button>' : '';
-    var delBtn = (isAdm && !isYou) ? '<button class="acc-del-btn" onclick="deleteAcc(\'' + name + '\')">Del</button>' : '';
-    h += '<div class="acc-row"><span class="acc-row-name">U ' + name + '</span><span class="acc-row-tag ' + (isYou ? 'you' : '') + '">' + (isYou ? '当前登录' : '账号') + '</span>' + editBtn + delBtn + '</div>';
-  });
+  // 账号列表
+  if (names.length === 0) {
+    h += '<div class="settings-empty"><span class="empty-icon">👤</span><span class="empty-text">暂无账号</span></div>';
+  } else {
+    h += '<div class="settings-list">';
+    names.forEach(function(name) {
+      var isYou = name === currentUser;
+      var userRole = u[name] && u[name].role ? u[name].role : 'user';
+      var roleBadge = userRole === 'admin' ? '<span class="role-badge admin">管理员</span>' : '<span class="role-badge user">普通用户</span>';
+      var youBadge = isYou ? '<span class="you-badge">当前登录</span>' : '';
+      
+      // 操作按钮
+      var actions = '';
+      if (isAdm) {
+        actions += '<button class="action-btn edit" onclick="showAccForm(\'' + name + '\')" title="编辑"><span>✏️</span></button>';
+        if (!isYou) {
+          actions += '<button class="action-btn delete" onclick="deleteAcc(\'' + name + '\')" title="删除"><span>🗑️</span></button>';
+        }
+      }
+      
+      h += '<div class="settings-item ' + (isYou ? 'current' : '') + '">';
+      h += '<div class="item-icon">👤</div>';
+      h += '<div class="item-content">';
+      h += '<div class="item-title">' + name + youBadge + '</div>';
+      h += '<div class="item-meta">' + roleBadge + '</div>';
+      h += '</div>';
+      h += '<div class="item-actions">' + actions + '</div>';
+      h += '</div>';
+    });
+    h += '</div>';
+  }
   
   el.innerHTML = h;
   cancelAccForm();
@@ -1151,20 +1187,59 @@ function renderSupList() {
   var hintEl = document.getElementById('supAdminHint');
   if (!el) return;
   var isAdm = isAdmin();
+  
+  var h = '';
+  
+  // 头部信息栏
+  h += '<div class="settings-header">';
+  h += '<div class="settings-stats">';
+  h += '<div class="stat-item"><span class="stat-value">' + suppliers.length + '</span><span class="stat-label">供应商总数</span></div>';
+  h += '</div>';
+  
+  // 快速添加区域
+  if (isAdm) {
+    h += '<div class="quick-add-box">';
+    h += '<input type="text" id="sup-new-input" class="quick-add-input" placeholder="输入新供应商名称..." onkeypress="if(event.key===\'Enter\')addSupplierFromSettings()">';
+    h += '<button class="quick-add-btn" onclick="addSupplierFromSettings()"><span>+</span> 添加</button>';
+    h += '</div>';
+  }
+  h += '</div>';
+  
+  // 提示信息
   if (hintEl) {
     hintEl.innerHTML = isAdm
-      ? '<div style="padding:8px 12px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:5px;color:#0066cc;font-size:12px;margin-bottom:12px">🏢 管理供应商列表（共 ' + suppliers.length + ' 个）</div>'
-      : '<div style="padding:8px 12px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:5px;color:#0066cc;font-size:12px;margin-bottom:12px">🏢 供应商列表（共 ' + suppliers.length + ' 个）</div>';
+      ? '<div class="settings-hint info"><span class="hint-icon">🏢</span><span class="hint-text">点击编辑按钮修改供应商名称，删除按钮移除供应商</span></div>'
+      : '<div class="settings-hint info"><span class="hint-icon">🏢</span><span class="hint-text">供应商列表（只读）</span></div>';
   }
+  
+  // 供应商列表
   if (suppliers.length === 0) {
-    el.innerHTML = '<div style="text-align:center;padding:20px;color:#999;font-size:13px">暂无供应商</div>';
-    return;
+    h += '<div class="settings-empty"><span class="empty-icon">🏢</span><span class="empty-text">暂无供应商</span><span class="empty-sub">点击上方"+ 添加"按钮添加供应商</span></div>';
+  } else {
+    h += '<div class="settings-list">';
+    suppliers.forEach(function(name, idx) {
+      // 计算该供应商的使用次数
+      var usageCount = recs.filter(function(r) { return r.supplier === name; }).length;
+      
+      var actions = '';
+      if (isAdm) {
+        actions += '<button class="action-btn edit" onclick="editSupplier(' + idx + ')" title="编辑"><span>✏️</span></button>';
+        actions += '<button class="action-btn delete" onclick="deleteSupplier(' + idx + ')" title="删除"><span>🗑️</span></button>';
+      }
+      
+      h += '<div class="settings-item">';
+      h += '<div class="item-icon supplier">🏢</div>';
+      h += '<div class="item-content">';
+      h += '<div class="item-title">' + name + '</div>';
+      h += '<div class="item-meta"><span class="usage-badge">使用 ' + usageCount + ' 次</span></div>';
+      h += '</div>';
+      h += '<div class="item-actions">' + actions + '</div>';
+      h += '</div>';
+    });
+    h += '</div>';
   }
-  el.innerHTML = suppliers.map(function(name, idx) {
-    var editBtn = '<button class="acc-edit-btn" onclick="editSupplier(' + idx + ')">Edit</button>';
-    var delBtn = isAdm ? '<button class="acc-del-btn" onclick="deleteSupplier(' + idx + ')">Del</button>' : '';
-    return '<div class="acc-row"><span class="acc-row-name">' + name + '</span>' + editBtn + delBtn + '</div>';
-  }).join('');
+  
+  el.innerHTML = h;
 }
 
 function addSupplierFromSettings() {
@@ -1211,20 +1286,61 @@ function renderProdList() {
   var hintEl = document.getElementById('prodAdminHint');
   if (!el) return;
   var isAdm = isAdmin();
+  
+  var h = '';
+  
+  // 头部信息栏
+  h += '<div class="settings-header">';
+  h += '<div class="settings-stats">';
+  h += '<div class="stat-item"><span class="stat-value">' + products.length + '</span><span class="stat-label">品名总数</span></div>';
+  h += '</div>';
+  
+  // 快速添加区域
+  if (isAdm) {
+    h += '<div class="quick-add-box">';
+    h += '<input type="text" id="prod-new-input" class="quick-add-input" placeholder="输入新品名..." onkeypress="if(event.key===\'Enter\')addProductFromSettings()">';
+    h += '<button class="quick-add-btn" onclick="addProductFromSettings()"><span>+</span> 添加</button>';
+    h += '</div>';
+  }
+  h += '</div>';
+  
+  // 提示信息
   if (hintEl) {
     hintEl.innerHTML = isAdm
-      ? '<div style="padding:8px 12px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:5px;color:#0066cc;font-size:12px;margin-bottom:12px">📦 管理品名列表（共 ' + products.length + ' 个）</div>'
-      : '<div style="padding:8px 12px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:5px;color:#0066cc;font-size:12px;margin-bottom:12px">📦 品名列表（共 ' + products.length + ' 个）</div>';
+      ? '<div class="settings-hint info"><span class="hint-icon">📦</span><span class="hint-text">点击编辑按钮修改品名，删除按钮移除品名</span></div>'
+      : '<div class="settings-hint info"><span class="hint-icon">📦</span><span class="hint-text">品名列表（只读）</span></div>';
   }
+  
+  // 品名列表
   if (products.length === 0) {
-    el.innerHTML = '<div style="text-align:center;padding:20px;color:#999;font-size:13px">暂无品名</div>';
-    return;
+    h += '<div class="settings-empty"><span class="empty-icon">📦</span><span class="empty-text">暂品名</span><span class="empty-sub">点击上方"+ 添加"按钮添加品名</span></div>';
+  } else {
+    h += '<div class="settings-list">';
+    products.forEach(function(name, idx) {
+      // 计算该品名的使用次数
+      var usageCount = recs.filter(function(r) { 
+        return r.products && r.products.indexOf(name) !== -1; 
+      }).length;
+      
+      var actions = '';
+      if (isAdm) {
+        actions += '<button class="action-btn edit" onclick="editProduct(' + idx + ')" title="编辑"><span>✏️</span></button>';
+        actions += '<button class="action-btn delete" onclick="deleteProduct(' + idx + ')" title="删除"><span>🗑️</span></button>';
+      }
+      
+      h += '<div class="settings-item">';
+      h += '<div class="item-icon product">📦</div>';
+      h += '<div class="item-content">';
+      h += '<div class="item-title">' + name + '</div>';
+      h += '<div class="item-meta"><span class="usage-badge">使用 ' + usageCount + ' 次</span></div>';
+      h += '</div>';
+      h += '<div class="item-actions">' + actions + '</div>';
+      h += '</div>';
+    });
+    h += '</div>';
   }
-  el.innerHTML = products.map(function(name, idx) {
-    var editBtn = '<button class="acc-edit-btn" onclick="editProduct(' + idx + ')">Edit</button>';
-    var delBtn = isAdm ? '<button class="acc-del-btn" onclick="deleteProduct(' + idx + ')">Del</button>' : '';
-    return '<div class="acc-row"><span class="acc-row-name">' + name + '</span>' + editBtn + delBtn + '</div>';
-  }).join('');
+  
+  el.innerHTML = h;
 }
 
 function addProductFromSettings() {

@@ -201,6 +201,51 @@ tr:hover td{background:rgba(247,129,102,.03)}
 .ptag .ptag-x{cursor:pointer;color:#cc0000;font-weight:bold;margin-left:2px;font-size:14px;line-height:1}
 .ptag .ptag-x:hover{color:#990000}
 
+/* ===== MODERN SETTINGS UI ===== */
+.settings-header{display:flex;flex-direction:column;gap:16px;margin-bottom:20px;padding:16px;background:linear-gradient(135deg,#f8faff,#fff);border:1px solid #e8f0fe;border-radius:10px}
+.settings-stats{display:flex;gap:24px;flex-wrap:wrap}
+.stat-item{display:flex;flex-direction:column;align-items:center;padding:12px 20px;background:#fff;border:1px solid #e8f0fe;border-radius:8px;min-width:100px}
+.stat-value{font-size:28px;font-weight:bold;color:var(--ac);line-height:1}
+.stat-label{font-size:11px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+.settings-add-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:linear-gradient(135deg,var(--ac),#0052a3);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(0,102,204,0.2)}
+.settings-add-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,102,204,0.3)}
+.settings-add-btn .btn-icon{font-size:20px;line-height:1}
+.settings-hint{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:16px}
+.settings-hint.warning{background:#fff8e6;border:1px solid #ffd591;color:#d46b08}
+.settings-hint.info{background:#e6f7ff;border:1px solid #91d5ff;color:#096dd9}
+.settings-hint .hint-icon{font-size:16px}
+.settings-hint .hint-text{flex:1}
+.settings-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center}
+.settings-empty .empty-icon{font-size:48px;margin-bottom:12px;opacity:.6}
+.settings-empty .empty-text{font-size:16px;color:var(--tx2);font-weight:bold;margin-bottom:4px}
+.settings-empty .empty-sub{font-size:12px;color:#999}
+.settings-list{display:flex;flex-direction:column;gap:10px}
+.settings-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;transition:all .2s}
+.settings-item:hover{border-color:#c5d8f8;box-shadow:0 2px 8px rgba(0,102,204,0.08)}
+.settings-item.current{background:#f0f7ff;border-color:#c5d8f8}
+.item-icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#f0f5ff;border:1px solid #c5d8f8;border-radius:10px;font-size:20px}
+.item-icon.supplier{background:#fff7e6;border-color:#ffd591}
+.item-icon.product{background:#f6ffed;border-color:#b7eb8f}
+.item-content{flex:1;min-width:0}
+.item-title{font-size:15px;font-weight:bold;color:var(--tx);display:flex;align-items:center;gap:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.you-badge{font-size:10px;padding:2px 8px;background:#52c41a;color:#fff;border-radius:10px;font-weight:normal}
+.role-badge{font-size:11px;padding:3px 10px;border-radius:12px;font-weight:bold}
+.role-badge.admin{background:#fff2e8;border:1px solid #ffbb96;color:#d46b08}
+.role-badge.user{background:#f6ffed;border:1px solid #b7eb8f;color:#389e0d}
+.usage-badge{font-size:11px;padding:3px 10px;background:#f0f5ff;border:1px solid #c5d8f8;border-radius:12px;color:var(--ac)}
+.item-meta{display:flex;gap:8px;margin-top:6px}
+.item-actions{display:flex;gap:8px}
+.action-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #d9d9d9;border-radius:8px;cursor:pointer;transition:all .2s;font-size:16px}
+.action-btn:hover{transform:translateY(-1px)}
+.action-btn.edit:hover{border-color:var(--ac);background:#e6f7ff}
+.action-btn.delete:hover{border-color:var(--rd);background:#fff1f0}
+.quick-add-box{display:flex;gap:10px}
+.quick-add-input{flex:1;background:#fff;border:2px solid #e8e8e8;border-radius:8px;padding:12px 16px;font-size:14px;color:var(--tx);outline:none;transition:all .2s}
+.quick-add-input:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(0,102,204,0.1)}
+.quick-add-btn{display:flex;align-items:center;gap:6px;padding:12px 20px;background:var(--ac);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;transition:all .2s;white-space:nowrap}
+.quick-add-btn:hover{background:#0052a3}
+.quick-add-btn span{font-size:18px;line-height:1}
+
 /* ACCESS PASSWORD SCREEN */
 .access-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;align-items:center;justify-content:center;z-index:10000;backdrop-filter:blur(8px)}
 .access-screen.hidden{display:none}
@@ -270,10 +315,6 @@ tr:hover td{background:rgba(247,129,102,.03)}
     <!-- Supplier management panel -->
     <div id="set-panel-sup" style="display:none">
       <div id="supAdminHint"></div>
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <input type="text" id="sup-new-input" placeholder="输入新供应商名称..." style="flex:1;background:#f5f5f5;border:1px solid var(--bd);border-radius:6px;padding:8px 12px;color:var(--tx);font-size:14px;outline:none">
-        <button class="btn-save" style="padding:8px 16px;white-space:nowrap" onclick="addSupplierFromSettings()">＋ 添加</button>
-      </div>
       <div id="supList"></div>
       <div class="bay-settings-buttons" style="margin-top:16px">
         <button class="btn-cancel" onclick="closeBaySettings()">✕ 关闭 Close</button>
@@ -283,10 +324,6 @@ tr:hover td{background:rgba(247,129,102,.03)}
     <!-- Product management panel -->
     <div id="set-panel-prod" style="display:none">
       <div id="prodAdminHint"></div>
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <input type="text" id="prod-new-input" placeholder="输入新品名..." style="flex:1;background:#f5f5f5;border:1px solid var(--bd);border-radius:6px;padding:8px 12px;color:var(--tx);font-size:14px;outline:none">
-        <button class="btn-save" style="padding:8px 16px;white-space:nowrap" onclick="addProductFromSettings()">＋ 添加</button>
-      </div>
       <div id="prodList"></div>
       <div class="bay-settings-buttons" style="margin-top:16px">
         <button class="btn-cancel" onclick="closeBaySettings()">✕ 关闭 Close</button>
@@ -487,6 +524,6 @@ tr:hover td{background:rgba(247,129,102,.03)}
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><script src="app.js?v=5"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><script src="app.js?v=6"></script>
 </body>
 </html>
