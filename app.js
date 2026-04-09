@@ -65,7 +65,7 @@ function getRate(bayId) {
 // ============================================================
 (function() {
   var checkReady = setInterval(function() {
-    if (typeof firebase !== 'undefined' && firebase.app && firebase.auth) {
+    if (typeof firebase !== 'undefined' && typeof firebase.app === 'function' && typeof firebase.auth === 'function') {
       clearInterval(checkReady);
       try {
         var app = firebase.app();
