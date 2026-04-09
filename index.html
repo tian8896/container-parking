@@ -1,0 +1,492 @@
+﻿<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Super Harvest Container Parking Management System</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#ffffff;--bg2:#f5f5f5;--bg3:#fafafa;--bg4:#f0f0f0;--bd:#e0e0e0;--tx:#1a1a1a;--tx2:#666666;--ac:#0066cc;--ac15:rgba(0,102,204,0.15);--am:#ff9900;--am15:rgba(255,153,0,0.15);--gr:#00aa00;--gr15:rgba(0,170,0,0.15);--rd:#cc0000;--rd15:rgba(204,0,0,0.15)}
+body{font-family:'Courier New',Courier,monospace;background:var(--bg);color:var(--tx);min-height:100vh;font-size:15px}
+header{background:linear-gradient(135deg,#ffffff,#f5f5f5);border-bottom:2px solid var(--ac);padding:20px 36px;position:relative;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(0,102,204,0.04) 60px,rgba(0,102,204,0.04) 62px);pointer-events:none}
+header h1{font-size:24px;letter-spacing:3px;text-transform:uppercase;color:var(--ac);text-shadow:0 0 20px var(--ac15);position:relative}
+header p{color:var(--tx);font-size:17px;font-weight:bold;margin-top:4px;letter-spacing:1px;position:relative}
+.hstats{display:flex;gap:28px;margin-top:14px;position:relative}
+.hstat{text-align:center}
+.hstat .v{font-size:22px;font-weight:bold;color:var(--am)}
+.hstat .l{font-size:11px;color:var(--tx2);letter-spacing:1px;text-transform:uppercase}
+.main{display:grid;grid-template-columns:360px 1fr;min-height:calc(100vh - 130px)}
+.left{border-right:1px solid var(--bd);padding:20px 15px 20px 20px;display:flex;flex-direction:column;gap:18px;overflow-y:auto;background:#fafafa}
+.section{background:var(--bg3);border:1px solid var(--bd);border-radius:7px;padding:18px 15px}
+.stitle{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--tx2);margin-bottom:14px;padding-bottom:9px;border-bottom:1px solid var(--bd)}
+.bgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bcard{background:var(--bg2);border:1px solid var(--bd);border-radius:6px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.bcard:hover{border-color:var(--ac);box-shadow:0 0 10px var(--ac15)}
+.bcard.on{border-color:var(--am);background:var(--am15)}
+.bcard.on::after{content:'●';position:absolute;top:7px;right:7px;color:var(--am);font-size:9px;animation:bk 1.5s infinite}
+.bcard.of::after{content:'○';position:absolute;top:7px;right:7px;color:var(--tx2);font-size:9px}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.3}}
+.bnum{font-size:30px;font-weight:bold;color:var(--ac)}
+.bcard.of .bnum{color:var(--tx2);opacity:.4}
+.bst{font-size:11px;color:var(--tx2);margin-top:3px}
+.bcard.on .bst{color:var(--am)}
+.bct{font-size:12px;color:var(--tx);margin-top:3px;font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* autocomplete */
+.autocomplete{position:relative}
+.autocomplete-list{position:absolute;top:100%;left:0;right:0;z-index:500;background:var(--bg4);border:1px solid var(--ac);border-top:none;border-radius:0 0 4px 4px;max-height:180px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+.autocomplete-item{padding:9px 12px;font-size:14px;cursor:pointer;transition:background .15s;font-family:'Courier New',monospace;color:var(--tx);letter-spacing:.5px}
+.autocomplete-item:hover,.autocomplete-item.hi{background:rgba(247,129,102,.15);color:var(--ac)}
+.autocomplete-item .hint{font-size:11px;color:var(--tx2);margin-left:8px}
+.fg{margin-bottom:13px}
+.fg label{display:block;font-size:11px;color:var(--tx2);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--bg4);border:1px solid var(--bd);border-radius:5px;padding:10px 12px;color:var(--tx);font-family:'Courier New',monospace;font-size:15px;outline:none;transition:border-color .2s}
+.fg input:focus,.fg select:focus{border-color:var(--ac)}
+.fg input::placeholder{color:var(--tx2);opacity:.7;font-size:13px}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:11px 18px;border:none;border-radius:5px;font-family:'Courier New',monospace;font-size:13px;font-weight:bold;letter-spacing:1px;cursor:pointer;transition:all .2s;text-transform:uppercase;gap:5px}
+.btn-p{background:var(--ac);color:#fff}
+.btn-p:hover{background:#e5634a;box-shadow:0 0 14px var(--ac15)}
+.btn-s{background:var(--gr);color:#fff}
+.btn-s:hover{background:#2ea043;box-shadow:0 0 14px var(--gr15)}
+.btn-d{background:var(--rd);color:#fff}
+.btn-d:hover{background:#da3633;box-shadow:0 0 14px var(--rd15)}
+.btn-g{background:var(--bg4);color:var(--tx2);border:1px solid var(--bd)}
+.btn-g:hover{border-color:var(--ac);color:var(--tx)}
+.brow{display:flex;gap:8px;margin-top:14px}
+.sbox{position:relative}
+.sbox input{width:100%;background:var(--bg4);border:1px solid var(--bd);border-radius:5px;padding:10px 12px 10px 36px;color:var(--tx);font-family:'Courier New',monospace;font-size:15px;outline:none;transition:border-color .2s}
+.sbox input:focus{border-color:var(--ac)}
+.sbox::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.5}
+.right{display:flex;flex-direction:column;font-size:15px}
+.tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--bd);padding:0 21px}
+.tab{padding:14px 20px;font-size:15px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:var(--tx2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.tab:hover{color:var(--tx)}
+.tab.ac{color:var(--ac);border-bottom-color:var(--ac)}
+.tc{flex:1;padding:18px 21px;overflow-y:auto;display:none}
+.tc.ac{display:block}
+.tw{overflow-x:auto;border:1px solid var(--bd);border-radius:6px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:var(--bg2);padding:12px 14px;text-align:left;font-size:14px;font-weight:bold;letter-spacing:.5px;text-transform:uppercase;color:var(--tx);border-bottom:2px solid var(--bd);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid rgba(48,54,61,.5);color:var(--tx);white-space:nowrap;font-size:14px;font-weight:500}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(247,129,102,.03)}
+.bdg{display:inline-block;padding:5px 10px;border-radius:3px;font-size:13px;font-weight:bold;font-family:Arial,sans-serif}
+.bdg-a{background:var(--am15);color:var(--am);border:1px solid rgba(210,153,34,.3)}
+.bdg-d{background:var(--gr15);color:var(--gr);border:1px solid rgba(63,185,80,.3)}
+.ftag{color:var(--ac);font-weight:bold}
+.abtn{padding:8px 16px;border:1px solid var(--bd);border-radius:4px;background:transparent;color:var(--tx);font-family:Arial,sans-serif;font-size:13px;font-weight:bold;cursor:pointer;margin-right:5px;transition:all .15s}
+.abtn:hover{border-color:var(--ac);color:var(--ac)}
+.abtn.x:hover{border-color:var(--rd);color:var(--rd)}
+.msel{display:flex;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+.msel select,.msel input{background:var(--bg4);border:1px solid var(--bd);border-radius:5px;padding:9px 14px;color:var(--tx);font-family:'Courier New',monospace;font-size:14px;outline:none}
+.mtot{background:var(--bg3);border:1px solid var(--bd);border-radius:7px;padding:14px 22px;display:flex;gap:36px;margin-bottom:18px}
+.mti .mil{font-size:11px;color:var(--tx2);letter-spacing:1px;text-transform:uppercase}
+.mti .miv{font-size:24px;font-weight:bold;color:var(--ac);margin-top:3px}
+.mti .miv.g{color:var(--gr)}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.scard{background:var(--bg3);border:1px solid var(--bd);border-radius:6px;padding:15px;transition:all .2s}
+.scard:hover{border-color:var(--am);box-shadow:0 0 12px var(--am15)}
+.sch{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}
+.scbay{font-size:17px;font-weight:bold;color:var(--ac)}
+.scocc{font-size:10px;padding:3px 8px;border-radius:3px;background:var(--am15);color:var(--am);border:1px solid rgba(210,153,34,.3)}
+.sr{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:1px solid rgba(48,54,61,.5)}
+.sr:last-child{border-bottom:none;padding-top:8px;font-weight:bold}
+.sr .sl{color:var(--tx2)}
+.sr .sv{color:var(--tx)}
+.sr:last-child .sv{color:var(--am);font-size:16px}
+.mov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.mov.sh{display:flex}
+.mdl{background:var(--bg3);border:1px solid var(--ac);border-radius:8px;padding:26px;width:460px;max-width:92vw;box-shadow:0 0 40px var(--ac15);animation:mi .2s ease}
+@keyframes mi{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+.mdl h3{color:var(--ac);font-size:15px;letter-spacing:2px;margin-bottom:18px;text-transform:uppercase}
+.mr{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(48,54,61,.5);font-size:13px}
+.mr:last-of-type{border-bottom:none;padding-top:12px;margin-top:4px;font-weight:bold}
+.mr .ml{color:var(--tx2)}
+.mr .mv{color:var(--tx)}
+.mr:last-child .mv{color:var(--ac);font-size:18px}
+.mdl .brow{margin-top:18px}
+.tst{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:6px;font-size:13px;letter-spacing:.5px;z-index:2000;animation:ti .3s ease;max-width:320px;line-height:1.6}
+.tst-ok{background:var(--bg3);border:1px solid var(--gr);color:var(--gr);box-shadow:0 0 18px var(--gr15)}
+.tst-err{background:var(--bg3);border:1px solid var(--rd);color:var(--rd);box-shadow:0 0 18px var(--rd15)}
+@keyframes ti{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.es{text-align:center;padding:60px 20px;color:var(--tx2);font-size:15px}
+.es .em{font-size:48px;margin-bottom:14px;opacity:.5}
+::-webkit-scrollbar{width:24px;height:24px}
+::-webkit-scrollbar-track{background:var(--bg2);border-radius:12px}
+::-webkit-scrollbar-thumb{background:#c0c0c0;border-radius:12px;border:3px solid var(--bg2)}
+::-webkit-scrollbar-thumb:hover{background:var(--ac)}
+@media(max-width:900px){.main{grid-template-columns:1fr}.left{border-right:none;border-bottom:1px solid var(--bd)}}
+/* LOGIN SCREEN */
+.login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#ffffff,#f5f5f5);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px)}
+.login-screen.hidden{display:none}
+.login-box{background:#fff;border:2px solid var(--ac);border-radius:12px;padding:40px;width:420px;max-width:90vw;box-shadow:0 8px 32px rgba(0,102,204,0.2)}
+.login-box h2{color:var(--ac);font-size:24px;margin-bottom:8px;text-align:center;letter-spacing:2px}
+.login-box p{color:var(--tx);text-align:center;margin-bottom:28px;font-size:17px;font-weight:bold}
+.login-form .fg{margin-bottom:16px}
+.login-form label{display:block;font-size:12px;color:var(--tx2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:bold}
+.login-form input{width:100%;background:#f5f5f5;border:1px solid var(--bd);border-radius:6px;padding:12px 14px;color:var(--tx);font-family:'Courier New',monospace;font-size:14px;outline:none;transition:all .2s}
+.login-form input:focus{border-color:var(--ac);background:#fff;box-shadow:0 0 8px var(--ac15)}
+.captcha-box{display:flex;gap:10px;margin-bottom:16px}
+.captcha-box canvas{border:1px solid var(--bd);border-radius:6px;background:#f5f5f5;cursor:pointer;flex:1;height:50px}
+.captcha-box button{padding:10px 14px;background:var(--bg4);border:1px solid var(--bd);border-radius:6px;color:var(--tx2);cursor:pointer;font-size:12px;transition:all .2s}
+.captcha-box button:hover{border-color:var(--ac);color:var(--ac)}
+.login-form .fg input.captcha-input{margin-bottom:0}
+.login-btn{width:100%;padding:14px;background:var(--ac);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:bold;letter-spacing:1px;cursor:pointer;transition:all .2s;text-transform:uppercase;margin-top:8px}
+.login-btn:hover{background:#0052a3;box-shadow:0 4px 12px var(--ac15)}
+.login-btn:active{transform:scale(0.98)}
+.login-error{color:var(--rd);font-size:12px;margin-top:12px;text-align:center;display:none}
+.login-error.show{display:block}
+/* BAY SETTINGS MODAL */
+.bay-settings-modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:2000;backdrop-filter:blur(4px)}
+.bay-settings-modal.show{display:flex}
+.bay-settings-content{background:#fff;border-radius:12px;padding:30px;width:500px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.2);max-height:85vh;overflow-y:auto}
+.bay-settings-content h3{color:var(--ac);font-size:18px;margin-bottom:20px;letter-spacing:1px}
+.bay-setting-item{display:flex;gap:12px;margin-bottom:14px;align-items:center}
+.bay-setting-item label{width:80px;font-size:12px;color:var(--tx2);text-transform:uppercase}
+.bay-setting-item input{flex:1;background:#f5f5f5;border:1px solid var(--bd);border-radius:6px;padding:8px 12px;color:var(--tx);font-size:13px}
+.bay-setting-item input:focus{border-color:var(--ac);background:#fff}
+.bay-settings-buttons{display:flex;gap:10px;margin-top:24px}
+.bay-settings-buttons button{flex:1;padding:10px;border:none;border-radius:6px;font-size:12px;font-weight:bold;cursor:pointer;transition:all .2s}
+.bay-settings-buttons .btn-save{background:var(--ac);color:#fff}
+.bay-settings-buttons .btn-save:hover{background:#0052a3}
+.bay-settings-buttons .btn-cancel{background:var(--bg4);color:var(--tx2);border:1px solid var(--bd)}
+.bay-settings-buttons .btn-cancel:hover{border-color:var(--ac);color:var(--ac)}
+.bay-del-btn{background:none;border:1px solid #ddd;border-radius:5px;color:#cc0000;cursor:pointer;font-size:13px;padding:6px 10px;transition:all .2s;flex-shrink:0}
+.bay-del-btn:hover{background:#fff0f0;border-color:#cc0000}
+.bay-add-btn{background:var(--ac);color:#fff;border:none;border-radius:6px;padding:9px 18px;font-size:13px;cursor:pointer;transition:all .2s;width:100%}
+.bay-add-btn:hover{background:#0052a3}
+.bay-setting-item input{flex:1;background:#f5f5f5;border:1px solid var(--bd);border-radius:6px;padding:8px 12px;color:var(--tx);font-size:14px;min-width:0}
+/* Settings tab bar */
+.set-tabs{display:flex;border-bottom:2px solid var(--bd);margin-bottom:18px;gap:4px}
+.set-tab{padding:9px 20px;font-size:13px;font-weight:bold;cursor:pointer;border-radius:6px 6px 0 0;color:var(--tx2);transition:all .2s;letter-spacing:.5px}
+.set-tab:hover{color:var(--ac);background:#f0f5ff}
+.set-tab.active{color:var(--ac);background:#e8f0fe;border-bottom:2px solid var(--ac);margin-bottom:-2px}
+/* Account list */
+.acc-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8f8f8;border:1px solid var(--bd);border-radius:7px;margin-bottom:8px}
+.acc-row-name{flex:1;font-weight:bold;font-size:14px;color:var(--tx)}
+.acc-row-tag{font-size:11px;padding:2px 8px;border-radius:10px;background:#e8f0fe;color:var(--ac);border:1px solid #c5d8f8}
+.acc-row-tag.you{background:#e6f9ee;color:var(--gr);border-color:#b2e8c4}
+.acc-edit-btn{padding:5px 12px;border:1px solid var(--ac);border-radius:5px;background:#fff;color:var(--ac);font-size:12px;cursor:pointer;transition:all .2s}
+.acc-edit-btn:hover{background:var(--ac);color:#fff}
+.acc-del-btn{padding:5px 12px;border:1px solid var(--rd);border-radius:5px;background:#fff;color:var(--rd);font-size:12px;cursor:pointer;transition:all .2s}
+.acc-del-btn:hover{background:var(--rd);color:#fff}
+.acc-add-btn{width:100%;padding:10px;background:var(--ac);color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:bold;cursor:pointer;margin-bottom:14px;transition:all .2s}
+.acc-add-btn:hover{background:#0052a3}
+/* Account form */
+.acc-form-box{background:#f0f5ff;border:1px solid #c5d8f8;border-radius:8px;padding:16px;margin-top:4px}
+.acc-form-title{font-size:13px;font-weight:bold;color:var(--ac);margin-bottom:12px;letter-spacing:.5px}
+.acc-form-err{color:var(--rd);font-size:12px;min-height:18px;margin-top:4px}
+.acc-form-box .fg label{font-size:11px;color:var(--tx2);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px}
+.acc-form-box .fg input{width:100%;background:#fff;border:1px solid var(--bd);border-radius:5px;padding:9px 12px;color:var(--tx);font-size:13px;outline:none;transition:border-color .2s}
+.acc-form-box .fg input:focus{border-color:var(--ac)}
+/* Fee settings panel */
+.fee-panel{background:#fffde7;border:1px solid #ffe082;border-radius:8px;padding:20px}
+.fee-title{font-size:16px;font-weight:bold;color:#f57f17;margin-bottom:8px;letter-spacing:.5px}
+.fee-desc{font-size:12px;color:#666;margin-bottom:16px}
+.fee-input-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.fee-input-row label{font-size:13px;color:#333;font-weight:bold;white-space:nowrap}
+.fee-input-row input{width:140px;background:#fff;border:2px solid #ffd54f;border-radius:6px;padding:10px 14px;font-size:18px;color:#333;font-weight:bold;text-align:center;outline:none;transition:border-color .2s}
+.fee-input-row input:focus{border-color:#f57f17;box-shadow:0 0 8px rgba(245,127,23,.2)}
+.fee-input-row span{font-size:14px;color:#666;font-weight:bold}
+.fee-hint{font-size:11px;color:#888;background:#fffde7;padding:8px 12px;border-radius:5px;border:1px solid #ffe082;margin-bottom:8px;line-height:1.6}
+.bay-rate-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid #ddd;border-radius:7px;margin-bottom:8px;transition:border-color .2s}
+.bay-rate-row:hover{border-color:#ffd54f}
+.bay-rate-name{flex:1;font-weight:bold;font-size:14px;color:#333}
+.bay-rate-input{width:100px;background:#fffde7;border:2px solid #ffd54f;border-radius:5px;padding:7px 10px;font-size:15px;color:#333;font-weight:bold;text-align:center;outline:none;transition:border-color .2s}
+.bay-rate-input:focus{border-color:#f57f17}
+.bay-rate-input:disabled{background:#f5f5f5;border-color:#ddd;color:#999;cursor:not-allowed}
+.bay-rate-aed{font-size:13px;color:#666;font-weight:bold}
+/* Product tags */
+.ptag{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:4px;font-size:12px;color:#0066cc;cursor:default}
+.ptag .ptag-x{cursor:pointer;color:#cc0000;font-weight:bold;margin-left:2px;font-size:14px;line-height:1}
+.ptag .ptag-x:hover{color:#990000}
+
+/* ACCESS PASSWORD SCREEN */
+.access-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;align-items:center;justify-content:center;z-index:10000;backdrop-filter:blur(8px)}
+.access-screen.hidden{display:none}
+.access-box{background:#fff;border:2px solid var(--ac);border-radius:12px;padding:40px;width:420px;max-width:90vw;box-shadow:0 8px 32px rgba(0,102,204,0.3)}
+.access-box h2{color:var(--ac);font-size:24px;margin-bottom:8px;text-align:center;letter-spacing:2px}
+.access-box p{color:var(--tx);text-align:center;margin-bottom:28px;font-size:17px;font-weight:bold}
+.access-form .fg{margin-bottom:16px}
+.access-form label{display:block;font-size:12px;color:var(--tx2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:bold}
+.access-form input{width:100%;background:#f5f5f5;border:1px solid var(--bd);border-radius:6px;padding:12px 14px;color:var(--tx);font-family:'Courier New',monospace;font-size:14px;outline:none;transition:all .2s}
+.access-form input:focus{border-color:var(--ac);background:#fff;box-shadow:0 0 8px var(--ac15)}
+.access-btn{width:100%;padding:14px;background:var(--ac);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:bold;letter-spacing:1px;cursor:pointer;transition:all .2s;text-transform:uppercase;margin-top:8px}
+.access-btn:hover{background:#0052a3;box-shadow:0 4px 12px var(--ac15)}
+.access-btn:active{transform:scale(0.98)}
+.access-error{color:var(--rd);font-size:12px;margin-top:12px;text-align:center;display:none}
+.access-error.show{display:block}
+
+</style>
+</head>
+<body>
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen"><div class="login-box"><h2>🚢 系统登录</h2><p>Super Harvest Container Parking Management System</p><div class="fg"><label>邮箱 Email</label><input type="email" id="loginEmail" placeholder="输入邮箱" autocomplete="off"></div><div class="fg"><label>密码 Password</label><input type="password" id="loginPwd" placeholder="输入密码" autocomplete="off"></div><div id="loginErrorMsg" style="color:#cc0000;font-size:13px;margin:8px 0;display:none;text-align:center"></div><button onclick="doLogin()" class="login-btn">登 录 LOGIN</button><button onclick="doRegister()" style="width:100%;padding:10px;font-size:14px;background:#fff;color:#333;border:1px solid #ddd;border-radius:6px;cursor:pointer;margin-top:8px;font-weight:bold">注册新账号 Register</button><div style="margin:14px 0;color:#999;font-size:12px;text-align:center">— 或者 —</div><button onclick="doGoogleLogin()" style="width:100%;padding:12px;font-size:14px;background:#fff;color:#333;border:1px solid #ddd;border-radius:6px;cursor:pointer;font-weight:bold"><img src="https://www.gstatic.com/firebaseui/ui/2.0.0/images/google-logo.png" style="width:20px;height:20px;vertical-align:middle;margin-right:8px">使用 Google 登录</button></div></div><!-- SETTINGS MODAL (Bay + Account) -->
+<div class="bay-settings-modal" id="baySettingsModal">
+  <div class="bay-settings-content">
+
+    <!-- Tab bar -->
+    <div class="set-tabs" style="flex-wrap:wrap">
+      <div class="set-tab active" id="stab-bay" onclick="switchSetTab('bay')">⚙️ 停车位</div>
+      <div class="set-tab" id="stab-sup" onclick="switchSetTab('sup')">🏢 供应商</div>
+      <div class="set-tab" id="stab-prod" onclick="switchSetTab('prod')">📦 品名</div>
+      <div class="set-tab" id="stab-acc" onclick="switchSetTab('acc')">👤 用户管理</div>
+      <div class="set-tab" id="stab-fee" onclick="switchSetTab('fee')">💰 计费设置</div>
+    </div>
+
+    <!-- Bay settings panel -->
+    <div id="set-panel-bay">
+      <div id="bayAdminHint"></div>
+      <div id="baySettingsForm"></div>
+      <div style="margin-top:12px">
+        <button type="button" class="bay-add-btn admin-only" onclick="addBayRow()">＋ 添加停车位 Add Bay</button>
+      </div>
+      <div class="bay-settings-buttons" style="margin-top:16px">
+        <button class="btn-save admin-only" onclick="saveBaySettings()">💾 保存 Save</button>
+        <button class="btn-cancel" onclick="closeBaySettings()">✕ 关闭 Close</button>
+      </div>
+    </div>
+
+    <div id="set-panel-acc" style="display:none"><div style="padding:8px 12px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:5px;color:#0066cc;font-size:12px;margin-bottom:12px">🔐 用户通过 Firebase Auth 管理，注册请在登录界面操作</div><div id="accList">加载中...</div><div class="bay-settings-buttons" style="margin-top:16px"><button class="btn-cancel" onclick="closeBaySettings()">✕ 关闭 Close</button></div></div>
+    </div>
+
+    <!-- Fee settings panel -->
+    <div id="set-panel-fee" style="display:none">
+      <div class="fee-panel">
+        <div class="fee-title">💰 各停车位单价设置</div>
+        <div class="fee-desc">每个车位可设置不同单价 · 仅管理员可修改</div>
+        <div id="bayRateList"></div>
+        <div class="fee-hint">
+          提示：费用按天计算，不足1天按1天收费<br>
+          Hint: Fee is calculated per day. Less than 1 day = 1 day charge.
+        </div>
+        <div class="bay-settings-buttons" style="margin-top:16px">
+          <button class="btn-save admin-only" id="saveFeeBtn" onclick="saveFeeSettings()">💾 保存 Save</button>
+          <button class="btn-cancel" onclick="closeBaySettings()">✕ 关闭 Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Supplier management panel -->
+    <div id="set-panel-sup" style="display:none">
+      <div id="supAdminHint"></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <input type="text" id="sup-new-input" placeholder="输入新供应商名称..." style="flex:1;background:#f5f5f5;border:1px solid var(--bd);border-radius:6px;padding:8px 12px;color:var(--tx);font-size:14px;outline:none">
+        <button class="btn-save" style="padding:8px 16px;white-space:nowrap" onclick="addSupplierFromSettings()">＋ 添加</button>
+      </div>
+      <div id="supList"></div>
+      <div class="bay-settings-buttons" style="margin-top:16px">
+        <button class="btn-cancel" onclick="closeBaySettings()">✕ 关闭 Close</button>
+      </div>
+    </div>
+
+    <!-- Product management panel -->
+    <div id="set-panel-prod" style="display:none">
+      <div id="prodAdminHint"></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <input type="text" id="prod-new-input" placeholder="输入新品名..." style="flex:1;background:#f5f5f5;border:1px solid var(--bd);border-radius:6px;padding:8px 12px;color:var(--tx);font-size:14px;outline:none">
+        <button class="btn-save" style="padding:8px 16px;white-space:nowrap" onclick="addProductFromSettings()">＋ 添加</button>
+      </div>
+      <div id="prodList"></div>
+      <div class="bay-settings-buttons" style="margin-top:16px">
+        <button class="btn-cancel" onclick="closeBaySettings()">✕ 关闭 Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<header>
+  <div style="display:flex;justify-content:space-between;align-items:center;position:relative;z-index:10">
+    <div>
+      <h1>🚢 迪拜大丰收集装箱管理系统</h1>
+      <p>Super Harvest Container Parking Management System</p>
+    </div>
+    <div style="display:flex;gap:12px;position:relative;z-index:1;align-items:center">
+      <div class="user-info" id="userInfo" style="background:rgba(0,102,204,0.1);border:1px solid #0066cc;border-radius:5px;padding:8px 14px;font-size:13px;color:#0066cc;display:flex;align-items:center;gap:8px">
+        <span>👤</span>
+        <span id="currentUserDisplay">未登录</span>
+        <span id="userRoleDisplay" style="font-size:11px;padding:2px 6px;background:#0066cc;color:#fff;border-radius:3px">-</span>
+      </div>
+      <button class="btn btn-g" onclick="openBaySettings()" title="设置停车位">⚙️ 设置</button>
+      <button class="btn btn-d" onclick="handleLogout()" title="退出登录">🚪 退出</button>
+    </div>
+  </div>
+  <div class="hstats" style="position:relative;z-index:1">
+    <div class="hstat"><div class="v" id="s-total">0</div><div class="l">总记录 Total</div></div>
+    <div class="hstat"><div class="v" id="s-active">0</div><div class="l">当前在位 Active</div></div>
+    <div class="hstat"><div class="v" id="s-rev">0</div><div class="l">总收益 AED Total</div></div>
+    <div class="hstat"><div class="v" id="s-mrev">0</div><div class="l">本月收益 AED Monthly</div></div>
+  </div>
+</header>
+<div class="main">
+<div class="left">
+  <div class="section">
+    <div class="stitle">📍 车位状态 / Bay Status</div>
+    <div class="bgrid" id="bgrid"></div>
+  </div>
+  <div class="section">
+    <div class="stitle">📝 入场登记 / Check In</div>
+    <div class="fg"><label>集装箱号码 Container No.</label>
+      <div class="autocomplete">
+        <input type="text" id="f-cn" placeholder="输入数字自动搜索... / Type digits to search..." maxlength="11" style="text-transform:uppercase" autocomplete="off" oninput="acSearch('f-cn',this.value)" onblur="setTimeout(()=>hideAc('ac-cn'),200)" onkeydown="acNav('ac-cn',event)">
+        <div class="autocomplete-list" id="ac-cn"></div>
+      </div>
+    </div>
+    <div class="fg"><label>停车位 Parking Bay</label>
+      <select id="f-bay">
+        <option value="">-- 选择车位 Select Bay --</option>
+      </select>
+    </div>
+    <div class="fg"><label>供应商 Supplier</label>
+      <div class="autocomplete">
+        <input type="text" id="f-supplier" placeholder="输入搜索或添加新供应商..." autocomplete="off" oninput="acSupplierSearch(this.value)" onblur="setTimeout(()=>hideAc('ac-supplier'),200)" onkeydown="acSupplierNav(event)">
+        <div class="autocomplete-list" id="ac-supplier"></div>
+      </div>
+    </div>
+    <div class="fg"><label>品名 Product Name <span style="color:var(--rd)">*</span></label>
+      <div class="autocomplete">
+        <input type="text" id="f-product" placeholder="输入搜索或添加新品名..." autocomplete="off" oninput="acProductSearch(this.value)" onblur="setTimeout(()=>hideAc('ac-product'),200)" onkeydown="acProductNav(event)">
+        <div class="autocomplete-list" id="ac-product"></div>
+      </div>
+      <div id="product-tags" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px"></div>
+    </div>
+    <div class="fg"><label>入场时间 Arrival Time</label><input type="datetime-local" id="f-at"></div>
+    <div class="brow">
+      <button class="btn btn-s" onclick="checkIn()">✓ 入场 Check In</button>
+      <button class="btn btn-g" onclick="qCheckIn()">⚡ 快速 Quick</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="stitle">🚚 出场登记 / Check Out</div>
+    <div class="fg"><label>集装箱号码 Container No.</label>
+      <div class="autocomplete">
+        <input type="text" id="f-cno" placeholder="输入数字自动搜索... / Type digits to search..." style="text-transform:uppercase" autocomplete="off" oninput="acSearch('f-cno',this.value)" onblur="setTimeout(()=>hideAc('ac-cno'),200)" onkeydown="acNav('ac-cno',event)">
+        <div class="autocomplete-list" id="ac-cno"></div>
+      </div>
+    </div>
+    <div class="fg"><label>出场时间 Departure Time</label><input type="datetime-local" id="f-dt"></div>
+    <div class="brow"><button class="btn btn-p" onclick="checkOut()">✈ 出场 Check Out</button></div>
+  </div>
+  <div class="section">
+    <div class="stitle">🔍 集装箱查询 / Container Search</div>
+    <div class="sbox"><input type="text" id="f-sch" placeholder="输入集装箱号码搜索... / Search Container No." style="text-transform:uppercase" oninput="doSearch()"></div>
+  </div>
+</div>
+<div class="right">
+  <div class="tabs">
+    <div class="tab ac" onclick="swTab('records')">📋 全部记录 All Records</div>
+    <div class="tab" onclick="swTab('active')">⏱ 在位记录 Active</div>
+    <div class="tab" onclick="swTab('sres')">🔎 查询结果 Search</div>
+    <div class="tab" onclick="swTab('monthly')">📊 月度统计 Monthly</div>
+  </div>
+  <div class="tc ac" id="tc-records">
+    <div class="tw"><table><thead><tr><th>集装箱号 Container</th><th>供应商</th><th>品名</th><th>车位 Bay</th><th>入场时间 Arrival</th><th>出场时间 Departure</th><th>停靠时长 Duration</th><th>费用 Fee (AED)</th><th>状态 Status</th><th>操作 Action</th></tr></thead><tbody id="tb-all"></tbody></table></div>
+    <div class="es" id="es-all" style="display:none"><div class="em">📭</div><div>暂无记录 / No Records Yet<br>请先进行入场登记 / Please check in a container first</div></div>
+  </div>
+  <div class="tc" id="tc-active">
+    <div class="tw"><table><thead><tr><th>集装箱号 Container</th><th>供应商</th><th>品名</th><th>车位 Bay</th><th>入场时间 Arrival</th><th>已停时长 Duration</th><th>当前费用 Est. Fee (AED)</th><th>操作 Action</th></tr></thead><tbody id="tb-act"></tbody></table></div>
+    <div class="es" id="es-act" style="display:none"><div class="em">✅</div><div>所有车位均已空闲 / All Bays Free</div></div>
+  </div>
+  <div class="tc" id="tc-sres">
+    <div class="tw"><table><thead><tr><th>#</th><th>集装箱号 Container</th><th>供应商</th><th>品名</th><th>车位 Bay</th><th>入场时间 Arrival</th><th>出场时间 Departure</th><th>停靠时长 Duration</th><th>费用 Fee (AED)</th><th>状态 Status</th></tr></thead><tbody id="tb-sch"></tbody><tfoot id="tf-sch" style="display:none"><tr style="background:#e8f0fe;border-top:2px solid var(--ac)"><td colspan="8" style="text-align:right;padding:14px 14px;font-size:18px;font-weight:bold;letter-spacing:1px">TOTAL 总费用:</td><td style="padding:14px 14px;font-size:22px;font-weight:bold;color:var(--ac)" id="tf-sch-total">0 AED</td><td></td></tr></tfoot></table></div>
+    <div class="es" id="es-sch"><div class="em">🔍</div><div>在上方搜索框输入集装箱号码 / Enter Container No. above</div></div>
+  </div>
+  <div class="tc" id="tc-monthly">
+    <div class="msel">
+      <label style="color:var(--tx2);font-size:10px;letter-spacing:1px">月份 Month：</label>
+      <select id="msel" onchange="renderMS()"></select>
+      <button class="btn btn-g" onclick="exportCSV()">📤 导出 Export</button>
+      <button class="btn btn-d clear-btn" onclick="openClearModal()">🗑 清空 Clear</button>
+    </div>
+    <div class="mtot">
+      <div class="mti"><div class="mil">停靠次数 Stays</div><div class="miv g" id="mc-c">0</div></div>
+      <div class="mti"><div class="mil">总收入 AED Revenue</div><div class="miv" id="mc-r">0</div></div>
+      <div class="mti"><div class="mil">总停靠天数 Total Days</div><div class="miv g" id="mc-d">0</div></div>
+    </div>
+    <div class="sgrid" id="sgrid"></div>
+    <div id="chartArea" style="margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div style="background:#fff;border:1px solid var(--bd);border-radius:8px;padding:20px">
+        <div style="font-size:14px;font-weight:bold;margin-bottom:12px;color:var(--tx)">📊 停车位 80/81/83/84/85 每日收入 Bar Chart (AED)</div>
+        <canvas id="barChart"></canvas>
+      </div>
+      <div style="background:#fff;border:1px solid var(--bd);border-radius:8px;padding:20px">
+        <div style="font-size:14px;font-weight:bold;margin-bottom:12px;color:var(--tx)">📈 其他停车位月度收入 Line Chart (AED)</div>
+        <canvas id="lineChart"></canvas>
+      </div>
+      <div style="background:#fff;border:1px solid var(--bd);border-radius:8px;padding:20px">
+        <div style="font-size:14px;font-weight:bold;margin-bottom:12px;color:var(--tx)">🥧 所有停车位每日收入占比</div>
+        <canvas id="pieDaily"></canvas>
+      </div>
+      <div style="background:#fff;border:1px solid var(--bd);border-radius:8px;padding:20px">
+        <div style="font-size:14px;font-weight:bold;margin-bottom:12px;color:var(--tx)">🥧 所有停车位每月收入占比</div>
+        <canvas id="pieMonthly"></canvas>
+      </div>
+      <div style="background:#fff;border:1px solid var(--bd);border-radius:8px;padding:20px;grid-column:1/-1">
+        <div style="font-size:14px;font-weight:bold;margin-bottom:12px;color:var(--tx)">📊📈 混合图 — 80/81/83/84/85 每日收入折线 + 各停车位每月收入柱状</div>
+        <canvas id="mixedChart" height="100"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="mov" id="modal">
+  <div class="mdl"><h3>📋 集装箱详情 / Container Details</h3><div id="mcon"></div><div class="brow"><button class="btn btn-g" onclick="clModal()">关闭 Close</button></div></div>
+</div>
+<!-- Clear Data Modal -->
+<div class="mov" id="clearModal">
+  <div class="mdl" style="width:520px">
+    <h3>🗑 数据清空 / Clear Data</h3>
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-size:12px;color:var(--tx2);margin-bottom:8px;letter-spacing:1px">选择清空范围 / Select Range:</label>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid var(--bd);border-radius:6px;cursor:pointer;transition:all .2s;font-size:14px" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='var(--bd)'"><input type="radio" name="clearType" value="today" checked style="width:18px;height:18px;accent-color:var(--ac)"> <strong>1.</strong> 清空今天的数据 / Clear Today</label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid var(--bd);border-radius:6px;cursor:pointer;transition:all .2s;font-size:14px" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='var(--bd)'"><input type="radio" name="clearType" value="range" style="width:18px;height:18px;accent-color:var(--ac)"> <strong>2.</strong> 清空指定时间范围 / Custom Range
+          <div id="clearRangeBox" style="display:none;width:100%;margin-top:8px;padding-left:28px;gap:8px;flex-direction:column">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <label style="font-size:12px;color:var(--tx2)">从 From:</label>
+              <input type="datetime-local" id="clearFrom" style="background:var(--bg4);border:1px solid var(--bd);border-radius:5px;padding:7px 10px;color:var(--tx);font-size:13px">
+              <label style="font-size:12px;color:var(--tx2)">至 To:</label>
+              <input type="datetime-local" id="clearTo" style="background:var(--bg4);border:1px solid var(--bd);border-radius:5px;padding:7px 10px;color:var(--tx);font-size:13px">
+            </div>
+          </div>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid var(--bd);border-radius:6px;cursor:pointer;transition:all .2s;font-size:14px" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='var(--bd)'"><input type="radio" name="clearType" value="month" style="width:18px;height:18px;accent-color:var(--ac)"> <strong>3.</strong> 清空当月数据 / Clear This Month</label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid var(--bd);border-radius:6px;cursor:pointer;transition:all .2s;font-size:14px" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='var(--bd)'"><input type="radio" name="clearType" value="all" style="width:18px;height:18px;accent-color:var(--ac)"> <strong>4.</strong> 清空全部数据 / Clear All Data</label>
+      </div>
+    </div>
+    <div id="clearMsg" style="display:none;padding:10px 14px;background:#fff0f0;border:1px solid #ffcccc;border-radius:6px;color:var(--rd);font-size:13px;margin-bottom:12px;text-align:center"></div>
+    <div class="brow">
+      <button class="btn btn-d" onclick="execClearData()">⚠️ 确定执行 Confirm</button>
+      <button class="btn btn-g" onclick="closeClearModal()">✕ 取消 Cancel</button>
+    </div>
+  </div>
+</div>
+<!-- Edit Record Modal -->
+<div class="mov" id="editModal">
+  <div class="mdl" style="width:520px">
+    <h3>✏️ 编辑记录 / Edit Record</h3>
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-size:12px;color:var(--tx2);margin-bottom:8px;letter-spacing:1px">选择要修改的项目 / Select Field to Edit:</label>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid var(--bd);border-radius:6px;cursor:pointer;transition:all .2s;font-size:14px" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='var(--bd)'"><input type="radio" name="editField" value="cn" style="width:18px;height:18px;accent-color:var(--ac)"> <strong>1.</strong> 集装箱号码 Container No.</label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid var(--bd);border-radius:6px;cursor:pointer;transition:all .2s;font-size:14px" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='var(--bd)'"><input type="radio" name="editField" value="supplier" style="width:18px;height:18px;accent-color:var(--ac)"> <strong>2.</strong> 供应商名称 Supplier</label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid var(--bd);border-radius:6px;cursor:pointer;transition:all .2s;font-size:14px" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='var(--bd)'"><input type="radio" name="editField" value="products" style="width:18px;height:18px;accent-color:var(--ac)"> <strong>3.</strong> 品名 Product Name</label>
+      </div>
+    </div>
+    <div id="editInputBox" style="display:none;margin-bottom:16px">
+      <div id="editInputContent"></div>
+      <div id="editInputHint" style="font-size:11px;color:var(--tx2);margin-top:6px"></div>
+      <div id="editProductTags" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px"></div>
+    </div>
+    <div id="editMsg" style="display:none;padding:10px 14px;background:#fff0f0;border:1px solid #ffcccc;border-radius:6px;color:var(--rd);font-size:13px;margin-bottom:12px;text-align:center"></div>
+    <div class="brow">
+      <button class="btn btn-p" onclick="execEditRec()">💾 保存 Save</button>
+      <button class="btn btn-g" onclick="closeEditModal()">✕ 取消 Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="app.js?v=3"></script>
+</body>
+</html>
