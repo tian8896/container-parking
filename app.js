@@ -43,6 +43,45 @@ var BAYS = DEFAULT_BAYS.slice();
 var acIdx = {};
 
 // ============================================================
+// USERS MANAGEMENT (Firebase)
+// ============================================================
+var cachedUsers = null;
+var usersRef = null;
+
+function initUsersRef() {
+  if (!usersRef && db) {
+    usersRef = db.ref('cpms_users');
+    usersRef.on('value', function(snap) {
+      cachedUsers = snap.val() || {};
+      // 更新界面
+      if (document.getElementById('accList')) {
+        renderAccList();
+      }
+    });
+  }
+}
+
+function getUsers() {
+  // 优先使用缓存的 Firebase 数据
+  if (cachedUsers) return cachedUsers;
+  // 回退到本地存储
+  try {
+    return JSON.parse(localStorage.getItem(USERS_KEY)) || {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function setUsers(users) {
+  cachedUsers = users;
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  // 同步到 Firebase
+  if (usersRef) {
+    usersRef.set(users);
+  }
+}
+
+// ============================================================
 // BAY SETTINGS HELPERS
 // ============================================================
 function getBayRates() {
@@ -107,6 +146,8 @@ function getRate(bayId) {
           if (d.bays) { BAYS = d.bays; localStorage.setItem(STORAGE_KEY, JSON.stringify(BAYS)); }
           if (d.bayRates) { localStorage.setItem(RATE_KEY, JSON.stringify(d.bayRates)); }
         }).catch(function() {});
+        // 初始化用户引用
+        initUsersRef();
       } catch(e) {}
     }
   }, 100);
@@ -481,16 +522,16 @@ function renderAccList() {
   h += '</div>';
   
   // 权限说明
-  h += '<div class="settings-hint info" style="margin-bottom:16px"><span class="hint-icon">💡</span><span class="hint-text"><b>权限说明：</b>管理员可管理停车位、计费设置和账号；普通员工可管理供应商和品名，可注册新账号。</span></div>';
+  h += '<div class="settings-hint info" style="margin-bottom:16px"><span class="hint-icon">💡</span><span class="hint-text"><b>权限说明：</b>管理员可管理停车位、计费设置和账号；普通员工可管理供应商和品名。</span></div>';
   
   // 账号表单区域（动态显示）
   h += '<div id="acc-form-box" style="display:none;margin-bottom:16px" class="acc-form-box">';
   h += '<div class="acc-form-title" id="acc-form-title">添加账号</div>';
-  h += '<div class="fg"><label>用户名 Username</label><input type="text" id="acc-username" placeholder="输入用户名..."></div>';
-  h += '<div class="fg"><label>密码 Password</label><input type="password" id="acc-password" placeholder="输入密码..."></div>';
+  h += '<div class="fg"><label>邮箱 Email</label><input type="email" id="acc-username" placeholder="输入邮箱..."></div>';
+  h += '<div class="fg"><label>密码 Password</label><input type="password" id="acc-password" placeholder="输入密码（至少6位）..."></div>';
   h += '<div class="fg"><label>确认密码 Confirm Password</label><input type="password" id="acc-password2" placeholder="再次输入密码..."></div>';
   h += '<div class="fg"><label>角色 Role</label><select id="acc-role"><option value="user">普通员工 Staff</option><option value="admin">管理员 Admin</option></select></div>';
-  h += '<div class="acc-form-err" id="acc-form-err"></div>';
+  h += '<div class="acc-form-err" id="acc-form-err" style="color:#cc0000;font-size:13px;margin:8px 0;display:none"></div>';
   h += '<div style="display:flex;gap:10px;margin-top:12px">';
   h += '<button class="btn btn-s" onclick="saveAccForm()">保存 Save</button>';
   h += '<button class="btn btn-g" onclick="cancelAccForm()">取消 Cancel</button>';
@@ -503,8 +544,10 @@ function renderAccList() {
   } else {
     h += '<div class="settings-list">';
     names.forEach(function(name) {
-      var isYou = name === currentUser;
-      var userRole = u[name] && u[name].role ? u[name].role : 'user';
+      var userData = u[name];
+      var userEmail = userData && userData.email ? userData.email : name;
+      var isYou = userEmail === currentUserEmail;
+      var userRole = userData && userData.role ? userData.role : 'user';
       var roleBadge = userRole === 'admin' ? '<span class="role-badge admin">管理员</span>' : '<span class="role-badge user">普通员工</span>';
       var youBadge = isYou ? '<span class="you-badge">当前登录</span>' : '';
       
@@ -520,7 +563,7 @@ function renderAccList() {
       h += '<div class="settings-item ' + (isYou ? 'current' : '') + '">';
       h += '<div class="item-icon">👤</div>';
       h += '<div class="item-content">';
-      h += '<div class="item-title">' + name + youBadge + '</div>';
+      h += '<div class="item-title">' + userEmail + youBadge + '</div>';
       h += '<div class="item-meta">' + roleBadge + '</div>';
       h += '</div>';
       h += '<div class="item-actions">' + actions + '</div>';
@@ -561,15 +604,16 @@ function showAccForm(username) {
     if (roleEl) roleEl.value = 'user';
     if (unameEl) unameEl.focus();
   } else {
-    // 编辑账号
-    if (titleEl) titleEl.textContent = '修改密码 - ' + username;
-    if (unameEl) { unameEl.value = username; unameEl.disabled = true; }
-    if (pw1) { pw1.value = ''; pw1.focus(); }
-    if (pw2) pw2.value = '';
+    // 编辑账号（仅修改角色，密码通过 Firebase Auth 单独处理）
     var u = getUsers();
-    if (roleEl && u[username]) {
-      var role = u[username].role || 'user';
-      roleEl.value = role;
+    var userData = u[username];
+    var userEmail = userData && userData.email ? userData.email : username;
+    if (titleEl) titleEl.textContent = '编辑账号 - ' + userEmail;
+    if (unameEl) { unameEl.value = userEmail; unameEl.disabled = true; }
+    if (pw1) { pw1.value = ''; pw1.placeholder = '留空则不修改密码'; }
+    if (pw2) { pw2.value = ''; pw2.placeholder = '留空则不修改密码'; }
+    if (roleEl && userData) {
+      roleEl.value = userData.role || 'user';
     }
   }
 }
@@ -654,55 +698,88 @@ function saveAccForm() {
     return;
   }
   
-  var errEl = document.getElementById('accFormErr');
-  var un = (document.getElementById('acc-username') || { value: '' }).value.trim();
+  var errEl = document.getElementById('acc-form-err');
+  var email = (document.getElementById('acc-username') || { value: '' }).value.trim();
   var pw1 = (document.getElementById('acc-password') || { value: '' }).value;
   var pw2 = (document.getElementById('acc-password2') || { value: '' }).value;
+  var roleEl = document.getElementById('acc-role');
+  var role = roleEl ? roleEl.value : 'user';
   var u = getUsers();
   
-  if (errEl) errEl.textContent = '';
+  if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
   
-  if (accEditTarget === null) {
-    if (!un) {
-      if (errEl) errEl.textContent = '请输入用户名';
-      return;
-    }
-    if (un.length < 2) {
-      if (errEl) errEl.textContent = '用户名至少2位';
-      return;
-    }
-    if (u[un]) {
-      if (errEl) errEl.textContent = '用户已存在';
-      return;
-    }
-  }
-  
-  if (!pw1) {
-    if (errEl) errEl.textContent = '请输入密码';
+  // 验证邮箱格式
+  if (!email) {
+    if (errEl) { errEl.textContent = '请输入邮箱'; errEl.style.display = 'block'; }
     return;
   }
-  if (pw1.length < 4) {
-    if (errEl) errEl.textContent = '密码至少4位';
+  if (!email.includes('@')) {
+    if (errEl) { errEl.textContent = '请输入有效的邮箱地址'; errEl.style.display = 'block'; }
+    return;
+  }
+  
+  // 验证密码
+  if (!pw1) {
+    if (errEl) { errEl.textContent = '请输入密码'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (pw1.length < 6) {
+    if (errEl) { errEl.textContent = '密码至少6位'; errEl.style.display = 'block'; }
     return;
   }
   if (pw1 !== pw2) {
-    if (errEl) errEl.textContent = '两次密码不一致';
+    if (errEl) { errEl.textContent = '两次密码不一致'; errEl.style.display = 'block'; }
     return;
   }
   
-  if (accEditTarget === null) {
-    u[un] = 'x' + btoa(pw1);
-    setUsers(u);
-    toast('账号 ' + un + ' 已创建', 'ok');
-    renderAccList();
-  } else {
-    u[accEditTarget] = 'x' + btoa(pw1);
-    setUsers(u);
-    toast(accEditTarget + ' 密码已更新', 'ok');
-    renderAccList();
+  // 使用 Firebase Auth 创建用户
+  if (!auth) {
+    if (errEl) { errEl.textContent = 'Firebase Auth 未初始化'; errEl.style.display = 'block'; }
+    return;
   }
   
-  renderAccList();
+  // 保存当前登录用户（管理员）
+  var currentAdmin = auth.currentUser;
+  
+  // 创建新用户
+  auth.createUserWithEmailAndPassword(email, pw1)
+    .then(function(userCredential) {
+      var newUser = userCredential.user;
+      var uid = newUser.uid;
+      
+      // 在数据库中保存用户角色信息
+      var userData = {
+        email: email,
+        role: role,
+        createdAt: firebase.database.ServerValue.TIMESTAMP,
+        createdBy: currentAdmin ? currentAdmin.uid : null
+      };
+      
+      return db.ref('cpms_users/' + uid).set(userData).then(function() {
+        // 同时更新本地用户列表（用于显示）
+        u[email] = { role: role, uid: uid };
+        setUsers(u);
+        
+        toast('账号 ' + email + ' 已创建', 'ok');
+        cancelAccForm();
+        renderAccList();
+        
+        // 重新登录为管理员（因为 createUser 会自动登录为新用户）
+        // 注意：这里需要管理员重新登录，或者使用 Admin SDK
+        // 客户端暂时无法自动切回管理员，需要提示
+        if (currentAdmin) {
+          alert('账号创建成功！\n\n注意：由于 Firebase Auth 限制，您已被切换到新创建的账号。\n请退出并使用管理员账号重新登录。');
+        }
+      });
+    })
+    .catch(function(err) {
+      var msg = '创建失败';
+      if (err.code === 'auth/email-already-in-use') msg = '邮箱已被注册';
+      else if (err.code === 'auth/invalid-email') msg = '邮箱格式错误';
+      else if (err.code === 'auth/weak-password') msg = '密码至少6位';
+      else if (err.message) msg = err.message;
+      if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+    });
 }
 
 function deleteAcc(username) {
