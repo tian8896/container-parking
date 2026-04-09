@@ -169,32 +169,9 @@ function doLogin() {
 }
 
 function doRegister() {
-  if (!firebaseAuthReady) { showLoginError('系统正在初始化，请稍候...'); return; }
-  var email = document.getElementById('loginEmail').value.trim();
-  var pwd = document.getElementById('loginPwd').value;
-  if (!email || !pwd) { showLoginError('请输入邮箱和密码'); return; }
-  if (pwd.length < 6) { showLoginError('密码至少6位'); return; }
-  showLoginError('');
-  auth.createUserWithEmailAndPassword(email, pwd)
-    .then(function(userCredential) {
-      var uid = userCredential.user.uid;
-      try {
-        var app = firebase.app();
-        firebase.database(app).ref('cpms_users/' + uid).set({
-          email: email,
-          role: 'user',
-          createdAt: firebase.database.ServerValue.TIMESTAMP
-        });
-      } catch(e) {}
-      toast('注册成功，已设为普通员工', 'ok');
-    })
-    .catch(function(err) {
-      var msg = '注册失败';
-      if (err.code === 'auth/email-already-in-use') msg = '邮箱已被注册';
-      else if (err.code === 'auth/invalid-email') msg = '邮箱格式错误';
-      else if (err.code === 'auth/weak-password') msg = '密码至少6位';
-      showLoginError(msg);
-    });
+  // 关闭公开注册，仅管理员可添加账号
+  showLoginError('注册功能已关闭，请联系管理员添加账号');
+  return;
 }
 
 function doGoogleLogin() {

@@ -266,7 +266,7 @@ tr:hover td{background:rgba(247,129,102,.03)}
 </head>
 <body>
 <!-- LOGIN SCREEN -->
-<div class="login-screen" id="loginScreen"><div class="login-box"><h2>🚢 系统登录</h2><p>Super Harvest Container Parking Management System</p><div class="fg"><label>邮箱 Email</label><input type="email" id="loginEmail" placeholder="输入邮箱" autocomplete="off"></div><div class="fg"><label>密码 Password</label><input type="password" id="loginPwd" placeholder="输入密码" autocomplete="off"></div><div id="loginErrorMsg" style="color:#cc0000;font-size:13px;margin:8px 0;display:none;text-align:center"></div><button onclick="doLogin()" class="login-btn">登 录 LOGIN</button><button onclick="doRegister()" style="width:100%;padding:10px;font-size:14px;background:#fff;color:#333;border:1px solid #ddd;border-radius:6px;cursor:pointer;margin-top:8px;font-weight:bold">注册新账号 Register</button><div style="margin:14px 0;color:#999;font-size:12px;text-align:center">— 或者 —</div><button onclick="doGoogleLogin()" style="width:100%;padding:12px;font-size:14px;background:#fff;color:#333;border:1px solid #ddd;border-radius:6px;cursor:pointer;font-weight:bold"><img src="https://www.gstatic.com/firebaseui/ui/2.0.0/images/google-logo.png" style="width:20px;height:20px;vertical-align:middle;margin-right:8px">使用 Google 登录</button></div></div><!-- SETTINGS MODAL (Bay + Account) -->
+<div class="login-screen" id="loginScreen"><div class="login-box"><h2>🚢 系统登录</h2><p>Super Harvest Container Parking Management System</p><div class="fg"><label>邮箱 Email</label><input type="email" id="loginEmail" placeholder="输入邮箱" autocomplete="off"></div><div class="fg"><label>密码 Password</label><input type="password" id="loginPwd" placeholder="输入密码" autocomplete="off"></div><div id="loginErrorMsg" style="color:#cc0000;font-size:13px;margin:8px 0;display:none;text-align:center"></div><button onclick="doLogin()" class="login-btn">登 录 LOGIN</button><div style="margin:14px 0;padding:10px;background:#fff3cd;border:1px solid #ffeaa7;border-radius:6px;color:#856404;font-size:12px;text-align:center">💡 新用户请联系管理员添加账号<br>New users please contact admin</div></div></div><!-- SETTINGS MODAL (Bay + Account) -->
 <div class="bay-settings-modal" id="baySettingsModal">
   <div class="bay-settings-content">
 
@@ -292,7 +292,7 @@ tr:hover td{background:rgba(247,129,102,.03)}
       </div>
     </div>
 
-    <div id="set-panel-acc" style="display:none"><div style="padding:8px 12px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:5px;color:#0066cc;font-size:12px;margin-bottom:12px">🔐 用户通过 Firebase Auth 管理，注册请在登录界面操作</div><div id="accList">加载中...</div><div class="bay-settings-buttons" style="margin-top:16px"><button class="btn-cancel" onclick="closeBaySettings()">✕ 关闭 Close</button></div></div>
+    <div id="set-panel-acc" style="display:none"><div style="padding:8px 12px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:5px;color:#0066cc;font-size:12px;margin-bottom:12px">🔐 只有管理员可以添加和管理用户账号</div><div id="accList">加载中...</div><div class="bay-settings-buttons" style="margin-top:16px"><button class="btn-cancel" onclick="closeBaySettings()">✕ 关闭 Close</button></div></div>
     </div>
 
     <!-- Fee settings panel -->
@@ -516,6 +516,6 @@ tr:hover td{background:rgba(247,129,102,.03)}
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><script src="app.js?v=8"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><script src="app.js?v=9"></script>
 </body>
 </html>
