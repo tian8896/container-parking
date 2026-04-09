@@ -144,9 +144,20 @@ function doLogin() {
   var pwd = document.getElementById('loginPwd').value;
   if (!email || !pwd) { showLoginError('请输入邮箱和密码'); return; }
   showLoginError('');
+  // 显示加载状态
+  var btn = document.querySelector('#loginScreen button[onclick="doLogin()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '登录中...'; }
   auth.signInWithEmailAndPassword(email, pwd)
-    .then(function() { toast('登录成功', 'ok'); })
+    .then(function(userCredential) {
+      // 立即切换界面，不等待 onAuthStateChanged
+      currentUserEmail = userCredential.user.email || '';
+      currentUserUid = userCredential.user.uid;
+      currentUserRole = 'admin';
+      onFirebaseLoginSuccess();
+      toast('登录成功', 'ok');
+    })
     .catch(function(err) {
+      if (btn) { btn.disabled = false; btn.textContent = '登录'; }
       var msg = '登录失败';
       if (err.code === 'auth/user-not-found') msg = '用户不存在';
       else if (err.code === 'auth/wrong-password') msg = '密码错误';
