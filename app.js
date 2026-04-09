@@ -485,12 +485,11 @@ function renderAccList() {
   
   // 统计信息
   var totalUsers = names.length;
-  var onlineUsers = names.filter(function(n) { return u[n] && u[n].online; }).length;
   
-  // 头部信息栏
+  // 头部信息栏 - 与停车位设置一致
   h += '<div class="settings-header">';
   h += '<div class="settings-stats">';
-  h += '<div class="stat-item"><span class="stat-value">' + totalUsers + '</span><span class="stat-label">总用户数</span></div>';
+  h += '<div class="stat-item"><span class="stat-value">' + totalUsers + '</span><span class="stat-label">用户总数</span></div>';
   h += '<div class="stat-item"><span class="stat-value">' + (isAdm ? '管理员' : '普通用户') + '</span><span class="stat-label">当前权限</span></div>';
   h += '</div>';
   
@@ -502,9 +501,23 @@ function renderAccList() {
   }
   h += '</div>';
   
+  // 账号表单区域（动态显示）
+  h += '<div id="acc-form-box" style="display:none;margin-bottom:16px" class="acc-form-box">';
+  h += '<div class="acc-form-title" id="acc-form-title">添加账号</div>';
+  h += '<div class="fg"><label>用户名 Username</label><input type="text" id="acc-username" placeholder="输入用户名..."></div>';
+  h += '<div class="fg"><label>密码 Password</label><input type="password" id="acc-password" placeholder="输入密码..."></div>';
+  h += '<div class="fg"><label>确认密码 Confirm Password</label><input type="password" id="acc-password2" placeholder="再次输入密码..."></div>';
+  h += '<div class="fg"><label>角色 Role</label><select id="acc-role"><option value="user">普通用户 User</option><option value="admin">管理员 Admin</option></select></div>';
+  h += '<div class="acc-form-err" id="acc-form-err"></div>';
+  h += '<div style="display:flex;gap:10px;margin-top:12px">';
+  h += '<button class="btn btn-s" onclick="saveAccForm()">保存 Save</button>';
+  h += '<button class="btn btn-g" onclick="cancelAccForm()">取消 Cancel</button>';
+  h += '</div>';
+  h += '</div>';
+  
   // 账号列表
   if (names.length === 0) {
-    h += '<div class="settings-empty"><span class="empty-icon">👤</span><span class="empty-text">暂无账号</span></div>';
+    h += '<div class="settings-empty"><span class="empty-icon">👤</span><span class="empty-text">暂无账号</span><span class="empty-sub">点击上方"+ 添加新账号"按钮添加</span></div>';
   } else {
     h += '<div class="settings-list">';
     names.forEach(function(name) {
@@ -535,10 +548,68 @@ function renderAccList() {
   }
   
   el.innerHTML = h;
-  cancelAccForm();
 }
 
 function showAccForm(username) {
+  // 只有管理员可以操作
+  if (!isAdmin()) {
+    alert('只有管理员可以管理账号');
+    return;
+  }
+  
+  accEditTarget = username;
+  
+  var formBox = document.getElementById('acc-form-box');
+  var titleEl = document.getElementById('acc-form-title');
+  var unameEl = document.getElementById('acc-username');
+  var pw1 = document.getElementById('acc-password');
+  var pw2 = document.getElementById('acc-password2');
+  var roleEl = document.getElementById('acc-role');
+  var errEl = document.getElementById('acc-form-err');
+  
+  if (formBox) formBox.style.display = 'block';
+  if (errEl) errEl.textContent = '';
+  
+  if (username === null) {
+    // 添加新账号
+    if (titleEl) titleEl.textContent = '添加账号';
+    if (unameEl) { unameEl.value = ''; unameEl.disabled = false; }
+    if (pw1) pw1.value = '';
+    if (pw2) pw2.value = '';
+    if (roleEl) roleEl.value = 'user';
+    if (unameEl) unameEl.focus();
+  } else {
+    // 编辑账号
+    if (titleEl) titleEl.textContent = '修改密码 - ' + username;
+    if (unameEl) { unameEl.value = username; unameEl.disabled = true; }
+    if (pw1) { pw1.value = ''; pw1.focus(); }
+    if (pw2) pw2.value = '';
+    var u = getUsers();
+    if (roleEl && u[username]) {
+      var role = u[username].role || 'user';
+      roleEl.value = role;
+    }
+  }
+}
+
+function cancelAccForm() {
+  var formBox = document.getElementById('acc-form-box');
+  if (formBox) formBox.style.display = 'none';
+  
+  accEditTarget = null;
+  
+  var unameEl = document.getElementById('acc-username');
+  var pw1 = document.getElementById('acc-password');
+  var pw2 = document.getElementById('acc-password2');
+  var errEl = document.getElementById('acc-form-err');
+  if (unameEl) unameEl.value = '';
+  if (pw1) pw1.value = '';
+  if (pw2) pw2.value = '';
+  if (errEl) errEl.textContent = '';
+}
+
+// 旧的函数保留兼容
+function showAccFormOld(username) {
   // 只有管理员可以操作
   if (!isAdmin()) {
     alert('只有管理员可以管理账号');
@@ -685,16 +756,44 @@ function loadFeePanel() {
   var el = document.getElementById('bayRateList');
   if (!el) return;
   
-  el.innerHTML = BAYS.map(function(bayId) {
+  var h = '';
+  
+  // 头部信息栏
+  h += '<div class="settings-header">';
+  h += '<div class="settings-stats">';
+  h += '<div class="stat-item"><span class="stat-value">' + BAYS.length + '</span><span class="stat-label">停车位总数</span></div>';
+  h += '<div class="stat-item"><span class="stat-value">' + DEFAULT_RATE + '</span><span class="stat-label">默认单价 (AED/天)</span></div>';
+  h += '</div>';
+  
+  if (!isAdm) {
+    h += '<div class="settings-hint warning"><span class="hint-icon">⚠️</span><span class="hint-text">只有管理员可以修改计费设置</span></div>';
+  }
+  h += '</div>';
+  
+  // 费率列表
+  h += '<div class="settings-list">';
+  BAYS.forEach(function(bayId, idx) {
     var rate = rates[bayId] !== undefined ? rates[bayId] : DEFAULT_RATE;
     var dis = isAdm ? '' : ' disabled';
-    return '<div class="bay-rate-row"><span class="bay-rate-name">Bay #' + bayId + '</span><input type="number" class="bay-rate-input" id="rate-' + bayId + '" value="' + rate + '"' + dis + ' min="1" max="99999" placeholder="' + DEFAULT_RATE + '"><span class="bay-rate-aed">AED/day</span></div>';
-  }).join('');
+    
+    h += '<div class="settings-item">';
+    h += '<div class="item-icon" style="background:#fff7e6;border-color:#ffd591">🅿️</div>';
+    h += '<div class="item-content">';
+    h += '<div class="item-title">停车位 #' + bayId + '</div>';
+    h += '<div class="item-meta"><span class="usage-badge">当前费率: ' + rate + ' AED/天</span></div>';
+    h += '</div>';
+    h += '<div class="item-actions" style="display:flex;align-items:center;gap:10px">';
+    h += '<input type="number" id="rate-' + bayId + '" value="' + rate + '"' + dis + ' min="1" max="99999" placeholder="' + DEFAULT_RATE + '" style="width:100px;padding:8px 12px;border:2px solid #ffd54f;border-radius:6px;font-size:16px;font-weight:bold;text-align:center;outline:none">';
+    h += '<span style="font-size:13px;color:#666;font-weight:bold;white-space:nowrap">AED/天</span>';
+    h += '</div>';
+    h += '</div>';
+  });
+  h += '</div>';
   
-  var hint = document.querySelector('.fee-hint');
-  if (hint) {
-    hint.innerHTML = isAdm ? 'Fee Rule: Before 23:00 = day 1 to midnight. After 23:00 = next day starts. Less than 1 day = 1 day charge.' : '<span style="color:#cc0000">WARNING: Only admin can modify fee</span>';
-  }
+  // 提示信息
+  h += '<div class="settings-hint info" style="margin-top:16px"><span class="hint-icon">💡</span><span class="hint-text">计费规则：23:00前入场算第1天到午夜，23:00后入场从次日开始计算。不足1天按1天收费。</span></div>';
+  
+  el.innerHTML = h;
 }
 
 function saveFeeSettings() {
@@ -1190,31 +1289,38 @@ function renderSupList() {
   
   var h = '';
   
-  // 头部信息栏
+  // 头部信息栏 - 与停车位设置一致
   h += '<div class="settings-header">';
   h += '<div class="settings-stats">';
   h += '<div class="stat-item"><span class="stat-value">' + suppliers.length + '</span><span class="stat-label">供应商总数</span></div>';
   h += '</div>';
   
-  // 快速添加区域
+  // 添加按钮（管理员）
   if (isAdm) {
-    h += '<div class="quick-add-box">';
-    h += '<input type="text" id="sup-new-input" class="quick-add-input" placeholder="输入新供应商名称..." onkeypress="if(event.key===\'Enter\')addSupplierFromSettings()">';
-    h += '<button class="quick-add-btn" onclick="addSupplierFromSettings()"><span>+</span> 添加</button>';
-    h += '</div>';
+    h += '<button class="settings-add-btn" onclick="showAddSupplierForm()"><span class="btn-icon">+</span><span class="btn-text">添加供应商</span></button>';
+  } else {
+    h += '<div class="settings-hint warning"><span class="hint-icon">⚠️</span><span class="hint-text">只有管理员可以管理供应商</span></div>';
   }
+  h += '</div>';
+  
+  // 添加表单区域（动态显示）
+  h += '<div id="sup-add-form" style="display:none;margin-bottom:16px" class="acc-form-box">';
+  h += '<div class="acc-form-title">添加供应商</div>';
+  h += '<div style="display:flex;gap:10px;align-items:center">';
+  h += '<input type="text" id="sup-new-input" placeholder="输入供应商名称..." style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px" onkeypress="if(event.key===\'Enter\')addSupplierFromSettings()">';
+  h += '<button class="btn btn-s" style="padding:10px 16px" onclick="addSupplierFromSettings()">保存</button>';
+  h += '<button class="btn btn-g" style="padding:10px 16px" onclick="hideAddSupplierForm()">取消</button>';
+  h += '</div>';
   h += '</div>';
   
   // 提示信息
   if (hintEl) {
-    hintEl.innerHTML = isAdm
-      ? '<div class="settings-hint info"><span class="hint-icon">🏢</span><span class="hint-text">点击编辑按钮修改供应商名称，删除按钮移除供应商</span></div>'
-      : '<div class="settings-hint info"><span class="hint-icon">🏢</span><span class="hint-text">供应商列表（只读）</span></div>';
+    hintEl.innerHTML = '';
   }
   
   // 供应商列表
   if (suppliers.length === 0) {
-    h += '<div class="settings-empty"><span class="empty-icon">🏢</span><span class="empty-text">暂无供应商</span><span class="empty-sub">点击上方"+ 添加"按钮添加供应商</span></div>';
+    h += '<div class="settings-empty"><span class="empty-icon">🏢</span><span class="empty-text">暂无供应商</span><span class="empty-sub">点击上方"+ 添加供应商"按钮添加</span></div>';
   } else {
     h += '<div class="settings-list">';
     suppliers.forEach(function(name, idx) {
@@ -1240,6 +1346,22 @@ function renderSupList() {
   }
   
   el.innerHTML = h;
+}
+
+function showAddSupplierForm() {
+  var form = document.getElementById('sup-add-form');
+  if (form) {
+    form.style.display = 'block';
+    var input = document.getElementById('sup-new-input');
+    if (input) input.focus();
+  }
+}
+
+function hideAddSupplierForm() {
+  var form = document.getElementById('sup-add-form');
+  if (form) form.style.display = 'none';
+  var input = document.getElementById('sup-new-input');
+  if (input) input.value = '';
 }
 
 function addSupplierFromSettings() {
@@ -1289,31 +1411,38 @@ function renderProdList() {
   
   var h = '';
   
-  // 头部信息栏
+  // 头部信息栏 - 与停车位设置一致
   h += '<div class="settings-header">';
   h += '<div class="settings-stats">';
   h += '<div class="stat-item"><span class="stat-value">' + products.length + '</span><span class="stat-label">品名总数</span></div>';
   h += '</div>';
   
-  // 快速添加区域
+  // 添加按钮（管理员）
   if (isAdm) {
-    h += '<div class="quick-add-box">';
-    h += '<input type="text" id="prod-new-input" class="quick-add-input" placeholder="输入新品名..." onkeypress="if(event.key===\'Enter\')addProductFromSettings()">';
-    h += '<button class="quick-add-btn" onclick="addProductFromSettings()"><span>+</span> 添加</button>';
-    h += '</div>';
+    h += '<button class="settings-add-btn" onclick="showAddProductForm()"><span class="btn-icon">+</span><span class="btn-text">添加品名</span></button>';
+  } else {
+    h += '<div class="settings-hint warning"><span class="hint-icon">⚠️</span><span class="hint-text">只有管理员可以管理品名</span></div>';
   }
+  h += '</div>';
+  
+  // 添加表单区域（动态显示）
+  h += '<div id="prod-add-form" style="display:none;margin-bottom:16px" class="acc-form-box">';
+  h += '<div class="acc-form-title">添加品名</div>';
+  h += '<div style="display:flex;gap:10px;align-items:center">';
+  h += '<input type="text" id="prod-new-input" placeholder="输入品名..." style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px" onkeypress="if(event.key===\'Enter\')addProductFromSettings()">';
+  h += '<button class="btn btn-s" style="padding:10px 16px" onclick="addProductFromSettings()">保存</button>';
+  h += '<button class="btn btn-g" style="padding:10px 16px" onclick="hideAddProductForm()">取消</button>';
+  h += '</div>';
   h += '</div>';
   
   // 提示信息
   if (hintEl) {
-    hintEl.innerHTML = isAdm
-      ? '<div class="settings-hint info"><span class="hint-icon">📦</span><span class="hint-text">点击编辑按钮修改品名，删除按钮移除品名</span></div>'
-      : '<div class="settings-hint info"><span class="hint-icon">📦</span><span class="hint-text">品名列表（只读）</span></div>';
+    hintEl.innerHTML = '';
   }
   
   // 品名列表
   if (products.length === 0) {
-    h += '<div class="settings-empty"><span class="empty-icon">📦</span><span class="empty-text">暂品名</span><span class="empty-sub">点击上方"+ 添加"按钮添加品名</span></div>';
+    h += '<div class="settings-empty"><span class="empty-icon">📦</span><span class="empty-text">暂无品名</span><span class="empty-sub">点击上方"+ 添加品名"按钮添加</span></div>';
   } else {
     h += '<div class="settings-list">';
     products.forEach(function(name, idx) {
@@ -1341,6 +1470,22 @@ function renderProdList() {
   }
   
   el.innerHTML = h;
+}
+
+function showAddProductForm() {
+  var form = document.getElementById('prod-add-form');
+  if (form) {
+    form.style.display = 'block';
+    var input = document.getElementById('prod-new-input');
+    if (input) input.focus();
+  }
+}
+
+function hideAddProductForm() {
+  var form = document.getElementById('prod-add-form');
+  if (form) form.style.display = 'none';
+  var input = document.getElementById('prod-new-input');
+  if (input) input.value = '';
 }
 
 function addProductFromSettings() {

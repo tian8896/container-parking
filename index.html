@@ -297,18 +297,10 @@ tr:hover td{background:rgba(247,129,102,.03)}
 
     <!-- Fee settings panel -->
     <div id="set-panel-fee" style="display:none">
-      <div class="fee-panel">
-        <div class="fee-title">💰 各停车位单价设置</div>
-        <div class="fee-desc">每个车位可设置不同单价 · 仅管理员可修改</div>
-        <div id="bayRateList"></div>
-        <div class="fee-hint">
-          提示：费用按天计算，不足1天按1天收费<br>
-          Hint: Fee is calculated per day. Less than 1 day = 1 day charge.
-        </div>
-        <div class="bay-settings-buttons" style="margin-top:16px">
-          <button class="btn-save admin-only" id="saveFeeBtn" onclick="saveFeeSettings()">💾 保存 Save</button>
-          <button class="btn-cancel" onclick="closeBaySettings()">✕ 关闭 Close</button>
-        </div>
+      <div id="bayRateList"></div>
+      <div class="bay-settings-buttons" style="margin-top:16px">
+        <button class="btn-save admin-only" id="saveFeeBtn" onclick="saveFeeSettings()">💾 保存 Save</button>
+        <button class="btn-cancel" onclick="closeBaySettings()">✕ 关闭 Close</button>
       </div>
     </div>
 
@@ -524,6 +516,6 @@ tr:hover td{background:rgba(247,129,102,.03)}
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><script src="app.js?v=6"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><script src="app.js?v=7"></script>
 </body>
 </html>
