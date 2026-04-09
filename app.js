@@ -182,11 +182,11 @@ function doRegister() {
         var app = firebase.app();
         firebase.database(app).ref('cpms_users/' + uid).set({
           email: email,
-          role: 'admin',
+          role: 'user',
           createdAt: firebase.database.ServerValue.TIMESTAMP
         });
       } catch(e) {}
-      toast('注册成功，已设为管理员', 'ok');
+      toast('注册成功，已设为普通员工', 'ok');
     })
     .catch(function(err) {
       var msg = '注册失败';
@@ -226,7 +226,7 @@ function updateUserDisplay() {
   if (!d || !r) return;
   if (currentUserEmail) {
     d.textContent = currentUserEmail;
-    r.textContent = currentUserRole === 'admin' ? '管理员' : '操作员';
+    r.textContent = currentUserRole === 'admin' ? '管理员' : '普通员工';
     r.style.background = currentUserRole === 'admin' ? '#0066cc' : '#666';
     var clearBtn = document.querySelector('.clear-btn');
     if (clearBtn) clearBtn.style.display = currentUserRole === 'admin' ? '' : 'none';
@@ -238,6 +238,8 @@ function updateUserDisplay() {
 }
 
 function isAdmin() { return currentUserRole === 'admin'; }
+function isStaff() { return currentUserRole === 'user' || currentUserRole === 'admin'; }
+function canManageSupplierProduct() { return currentUserRole === 'user' || currentUserRole === 'admin'; }
 
 // ============================================================
 // INIT
@@ -490,7 +492,7 @@ function renderAccList() {
   h += '<div class="settings-header">';
   h += '<div class="settings-stats">';
   h += '<div class="stat-item"><span class="stat-value">' + totalUsers + '</span><span class="stat-label">用户总数</span></div>';
-  h += '<div class="stat-item"><span class="stat-value">' + (isAdm ? '管理员' : '普通用户') + '</span><span class="stat-label">当前权限</span></div>';
+  h += '<div class="stat-item"><span class="stat-value">' + (isAdm ? '管理员' : '普通员工') + '</span><span class="stat-label">当前权限</span></div>';
   h += '</div>';
   
   // 只有管理员可以添加账号
@@ -501,13 +503,16 @@ function renderAccList() {
   }
   h += '</div>';
   
+  // 权限说明
+  h += '<div class="settings-hint info" style="margin-bottom:16px"><span class="hint-icon">💡</span><span class="hint-text"><b>权限说明：</b>管理员可管理停车位、计费设置和账号；普通员工可管理供应商和品名，可注册新账号。</span></div>';
+  
   // 账号表单区域（动态显示）
   h += '<div id="acc-form-box" style="display:none;margin-bottom:16px" class="acc-form-box">';
   h += '<div class="acc-form-title" id="acc-form-title">添加账号</div>';
   h += '<div class="fg"><label>用户名 Username</label><input type="text" id="acc-username" placeholder="输入用户名..."></div>';
   h += '<div class="fg"><label>密码 Password</label><input type="password" id="acc-password" placeholder="输入密码..."></div>';
   h += '<div class="fg"><label>确认密码 Confirm Password</label><input type="password" id="acc-password2" placeholder="再次输入密码..."></div>';
-  h += '<div class="fg"><label>角色 Role</label><select id="acc-role"><option value="user">普通用户 User</option><option value="admin">管理员 Admin</option></select></div>';
+  h += '<div class="fg"><label>角色 Role</label><select id="acc-role"><option value="user">普通员工 Staff</option><option value="admin">管理员 Admin</option></select></div>';
   h += '<div class="acc-form-err" id="acc-form-err"></div>';
   h += '<div style="display:flex;gap:10px;margin-top:12px">';
   h += '<button class="btn btn-s" onclick="saveAccForm()">保存 Save</button>';
@@ -523,7 +528,7 @@ function renderAccList() {
     names.forEach(function(name) {
       var isYou = name === currentUser;
       var userRole = u[name] && u[name].role ? u[name].role : 'user';
-      var roleBadge = userRole === 'admin' ? '<span class="role-badge admin">管理员</span>' : '<span class="role-badge user">普通用户</span>';
+      var roleBadge = userRole === 'admin' ? '<span class="role-badge admin">管理员</span>' : '<span class="role-badge user">普通员工</span>';
       var youBadge = isYou ? '<span class="you-badge">当前登录</span>' : '';
       
       // 操作按钮
@@ -1286,6 +1291,7 @@ function renderSupList() {
   var hintEl = document.getElementById('supAdminHint');
   if (!el) return;
   var isAdm = isAdmin();
+  var canManage = canManageSupplierProduct();
   
   var h = '';
   
@@ -1295,11 +1301,11 @@ function renderSupList() {
   h += '<div class="stat-item"><span class="stat-value">' + suppliers.length + '</span><span class="stat-label">供应商总数</span></div>';
   h += '</div>';
   
-  // 添加按钮（管理员）
-  if (isAdm) {
+  // 添加按钮（管理员和普通员工都可以）
+  if (canManage) {
     h += '<button class="settings-add-btn" onclick="showAddSupplierForm()"><span class="btn-icon">+</span><span class="btn-text">添加供应商</span></button>';
   } else {
-    h += '<div class="settings-hint warning"><span class="hint-icon">⚠️</span><span class="hint-text">只有管理员可以管理供应商</span></div>';
+    h += '<div class="settings-hint warning"><span class="hint-icon">⚠️</span><span class="hint-text">无权限管理供应商</span></div>';
   }
   h += '</div>';
   
@@ -1328,7 +1334,7 @@ function renderSupList() {
       var usageCount = recs.filter(function(r) { return r.supplier === name; }).length;
       
       var actions = '';
-      if (isAdm) {
+      if (canManage) {
         actions += '<button class="action-btn edit" onclick="editSupplier(' + idx + ')" title="编辑"><span>✏️</span></button>';
         actions += '<button class="action-btn delete" onclick="deleteSupplier(' + idx + ')" title="删除"><span>🗑️</span></button>';
       }
@@ -1394,7 +1400,7 @@ function editSupplier(idx) {
 }
 
 function deleteSupplier(idx) {
-  if (!isAdmin()) { toast('只有管理员可以删除', 'err'); return; }
+  if (!canManageSupplierProduct()) { toast('无权限删除供应商', 'err'); return; }
   var name = suppliers[idx];
   if (!confirm('确定删除供应商 "' + name + '"？')) return;
   suppliers.splice(idx, 1);
@@ -1408,6 +1414,7 @@ function renderProdList() {
   var hintEl = document.getElementById('prodAdminHint');
   if (!el) return;
   var isAdm = isAdmin();
+  var canManage = canManageSupplierProduct();
   
   var h = '';
   
@@ -1417,11 +1424,11 @@ function renderProdList() {
   h += '<div class="stat-item"><span class="stat-value">' + products.length + '</span><span class="stat-label">品名总数</span></div>';
   h += '</div>';
   
-  // 添加按钮（管理员）
-  if (isAdm) {
+  // 添加按钮（管理员和普通员工都可以）
+  if (canManage) {
     h += '<button class="settings-add-btn" onclick="showAddProductForm()"><span class="btn-icon">+</span><span class="btn-text">添加品名</span></button>';
   } else {
-    h += '<div class="settings-hint warning"><span class="hint-icon">⚠️</span><span class="hint-text">只有管理员可以管理品名</span></div>';
+    h += '<div class="settings-hint warning"><span class="hint-icon">⚠️</span><span class="hint-text">无权限管理品名</span></div>';
   }
   h += '</div>';
   
@@ -1452,7 +1459,7 @@ function renderProdList() {
       }).length;
       
       var actions = '';
-      if (isAdm) {
+      if (canManage) {
         actions += '<button class="action-btn edit" onclick="editProduct(' + idx + ')" title="编辑"><span>✏️</span></button>';
         actions += '<button class="action-btn delete" onclick="deleteProduct(' + idx + ')" title="删除"><span>🗑️</span></button>';
       }
@@ -1521,7 +1528,7 @@ function editProduct(idx) {
 }
 
 function deleteProduct(idx) {
-  if (!isAdmin()) { toast('只有管理员可以删除', 'err'); return; }
+  if (!canManageSupplierProduct()) { toast('无权限删除品名', 'err'); return; }
   var name = products[idx];
   if (!confirm('确定删除品名 "' + name + '"？')) return;
   products.splice(idx, 1);
