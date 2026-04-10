@@ -37,6 +37,7 @@ var selectedProducts = [];
 var cTab = 'records';
 var sTimer = null;
 var dbRef = null;
+var db = null;
 var settingsRef = null;
 var connected = false;
 var BAYS = DEFAULT_BAYS.slice();
@@ -152,7 +153,7 @@ function getRate(bayId) {
       });
 
       try {
-        var db = firebase.database(app);
+        db = firebase.database(app);
         db.ref('cpms_settings').once('value').then(function(snap) {
           var d = snap.val() || {};
           if (d.bays) { BAYS = d.bays; localStorage.setItem(STORAGE_KEY, JSON.stringify(BAYS)); }
@@ -294,7 +295,7 @@ function initApp() {
   updateBaySelect();
   var app;
   try { app = firebase.app(); } catch(e) { app = firebase.initializeApp(FIREBASE_AUTH_CONFIG); }
-  var db = firebase.database(app);
+  db = firebase.database(app);
   if (dbRef) dbRef.off();
   dbRef = db.ref(SK);
   dbRef.on('value', function(snap) {
@@ -1060,7 +1061,7 @@ function initApp() {
     app = firebase.initializeApp(config);
   }
   
-  var db = firebase.database(app);
+  db = firebase.database(app);
   if (dbRef) dbRef.off();
   
   dbRef = db.ref(SK);
