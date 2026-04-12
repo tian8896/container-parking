@@ -30,6 +30,19 @@ var currentUserRole = 'admin';
 // ============================================================
 // HELPERS
 // ============================================================
+function toggleLoginPwd() {
+  var pwd = document.getElementById('loginPwd');
+  var btn = document.getElementById('togglePwdBtn');
+  if (!pwd || !btn) return;
+  if (pwd.type === 'password') {
+    pwd.type = 'text';
+    btn.textContent = '隐藏';
+  } else {
+    pwd.type = 'password';
+    btn.textContent = '显示';
+  }
+}
+
 function titleCase(str) {
   if (!str) return '';
   return str.trim().toLowerCase().replace(/\b\w/g, function(c) { return c.toUpperCase(); });
