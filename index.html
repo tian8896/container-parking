@@ -266,7 +266,8 @@ tr:hover td{background:rgba(247,129,102,.03)}
 </head>
 <body>
 <!-- LOGIN SCREEN -->
-<div class="login-screen" id="loginScreen"><div class="login-box"><h2>🚢 系统登录</h2><p>Super Harvest Container Parking Management System</p><div class="fg"><label>邮箱 Email</label><input type="email" id="loginEmail" placeholder="输入邮箱" autocomplete="off"></div><div class="fg"><label>密码 Password</label><input type="password" id="loginPwd" placeholder="输入密码" autocomplete="off"></div><div id="loginErrorMsg" style="color:#cc0000;font-size:13px;margin:8px 0;display:none;text-align:center"></div><button onclick="doLogin()" class="login-btn">登 录 LOGIN</button><div style="margin:14px 0;padding:10px;background:#fff3cd;border:1px solid #ffeaa7;border-radius:6px;color:#856404;font-size:12px;text-align:center">💡 新用户请联系管理员添加账号<br>New users please contact admin</div></div></div><!-- SETTINGS MODAL (Bay + Account) -->
+<div class="login-screen" id="loginScreen"><div class="login-box"><h2>🚢 系统登录</h2><p>Super Harvest Container Parking Management System</p><div class="fg"><label>邮箱 Email</label><input type="email" id="loginEmail" placeholder="输入邮箱" autocomplete="off"></div><div class="fg"><label>密码 Password</label><input type="password" id="loginPwd" placeholder="输入密码" autocomplete="off" style="padding-right:60px;position:relative">
+<div onclick="toggleLoginPwd()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#0066cc;font-size:12px" id="togglePwdBtn">显示</div></div><div id="loginErrorMsg" style="color:#cc0000;font-size:13px;margin:8px 0;display:none;text-align:center"></div><button onclick="doLogin()" class="login-btn">登 录 LOGIN</button><div style="margin:14px 0;padding:10px;background:#fff3cd;border:1px solid #ffeaa7;border-radius:6px;color:#856404;font-size:12px;text-align:center">💡 新用户请联系管理员添加账号<br>New users please contact admin</div></div></div><!-- SETTINGS MODAL (Bay + Account) -->
 <div class="bay-settings-modal" id="baySettingsModal">
   <div class="bay-settings-content">
 
@@ -532,6 +533,6 @@ tr:hover td{background:rgba(247,129,102,.03)}
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><script src="app.js?v=17"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><script src="app.js?v=18"></script>
 </body>
 </html>
