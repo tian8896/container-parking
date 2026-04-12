@@ -43,6 +43,31 @@ function toggleLoginPwd() {
   }
 }
 
+function refreshUsersList() {
+  // 强制从 Firebase 刷新用户列表
+  if (usersRef) {
+    usersRef.once('value').then(function(snap) {
+      var fbUsers = snap.val() || {};
+      cachedUsers = {};
+      Object.keys(fbUsers).forEach(function(uid) {
+        var ud = fbUsers[uid];
+        cachedUsers[uid] = {
+          email: ud.email || '',
+          role: ud.role || 'user',
+          uid: uid
+        };
+      });
+      localStorage.setItem(USERS_KEY, JSON.stringify(cachedUsers));
+      renderAccList();
+      toast('用户列表已刷新', 'ok');
+    }).catch(function(err) {
+      toast('刷新失败: ' + err.message, 'err');
+    });
+  } else {
+    renderAccList();
+  }
+}
+
 function titleCase(str) {
   if (!str) return '';
   return str.trim().toLowerCase().replace(/\b\w/g, function(c) { return c.toUpperCase(); });
@@ -547,12 +572,26 @@ function renderAccList() {
   
   // 统计信息
   var totalUsers = names.length;
+  var adminCount = 0;
+  var staffCount = 0;
+  names.forEach(function(name) {
+    var userData = u[name];
+    var role = userData && userData.role ? userData.role : 'user';
+    if (role === 'admin') adminCount++;
+    else staffCount++;
+  });
   
   // 头部信息栏 - 与停车位设置一致
   h += '<div class="settings-header">';
   h += '<div class="settings-stats">';
   h += '<div class="stat-item"><span class="stat-value">' + totalUsers + '</span><span class="stat-label">用户总数</span></div>';
+  h += '<div class="stat-item"><span class="stat-value">' + adminCount + '</span><span class="stat-label">管理员</span></div>';
+  h += '<div class="stat-item"><span class="stat-value">' + staffCount + '</span><span class="stat-label">普通员工</span></div>';
   h += '<div class="stat-item"><span class="stat-value">' + (isAdm ? '管理员' : '普通员工') + '</span><span class="stat-label">当前权限</span></div>';
+  h += '</div>';
+  
+  // 刷新按钮
+  h += '<button onclick="refreshUsersList()" style="padding:8px 16px;background:#f5f5f5;border:1px solid #ddd;border-radius:6px;font-size:13px;cursor:pointer;margin-left:auto">刷新列表</button>';
   h += '</div>';
   
   // 只有管理员可以添加账号
