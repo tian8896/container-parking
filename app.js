@@ -804,7 +804,22 @@ function saveAccForm() {
         return db.ref('cpms_users/' + uid).set(userData).then(function() {
           toast('账号 ' + email + ' 已创建', 'ok');
           cancelAccForm();
-          renderAccList();
+          
+          // 刷新用户列表
+          usersRef.once('value').then(function(snap) {
+            var fbUsers = snap.val() || {};
+            cachedUsers = {};
+            Object.keys(fbUsers).forEach(function(uid2) {
+              var ud = fbUsers[uid2];
+              cachedUsers[uid2] = {
+                email: ud.email || '',
+                role: ud.role || 'user',
+                uid: uid2
+              };
+            });
+            localStorage.setItem(USERS_KEY, JSON.stringify(cachedUsers));
+            renderAccList();
+          });
           
           // 重新登录为管理员（因为 createUser 会自动登录为新用户）
           if (currentAdmin) {
