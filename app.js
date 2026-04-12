@@ -1161,6 +1161,7 @@ function initApp() {
 function initSuppliersProducts() {
   suppliers = getSuppliers();
   products = getProducts();
+  updateSupplierFilter();
 }
 
 function updateBaySelect() {
@@ -1297,6 +1298,11 @@ var productAcIdx = -1;
 
 function getSuppliers() {
   try { return JSON.parse(localStorage.getItem('cpms_suppliers')) || []; } catch(e) { return []; }
+}
+
+function setSuppliers(arr) {
+  suppliers = arr;
+  updateSupplierFilter();
 }
 function saveSuppliers(arr) {
   localStorage.setItem('cpms_suppliers', JSON.stringify(arr));
@@ -1727,6 +1733,7 @@ function syncSuppliersProducts(data) {
     products = data.products;
     localStorage.setItem('cpms_products', JSON.stringify(products));
   }
+  updateSupplierFilter();
 }
 
 // ============================================================
@@ -1930,8 +1937,32 @@ function doSearch() {
   }, 300);
 }
 
+function clearSearchFilters() {
+  if (gid('f-sch')) gid('f-sch').value = '';
+  if (gid('f-sup-filter')) gid('f-sup-filter').value = '';
+  if (gid('f-date-start')) gid('f-date-start').value = '';
+  if (gid('f-date-end')) gid('f-date-end').value = '';
+  renderSRes();
+}
+
+function updateSupplierFilter() {
+  var sel = gid('f-sup-filter');
+  if (!sel) return;
+  var currentVal = sel.value;
+  var html = '<option value="">全部供应商</option>';
+  suppliers.forEach(function(s) {
+    html += '<option value="' + s + '">' + s + '</option>';
+  });
+  sel.innerHTML = html;
+  sel.value = currentVal;
+}
+
 function renderSRes() {
   var q = ((gid('f-sch') || { value: '' }).value || '').trim().toUpperCase();
+  var supplierFilter = (gid('f-sup-filter') || { value: '' }).value || '';
+  var dateStart = (gid('f-date-start') || { value: '' }).value || '';
+  var dateEnd = (gid('f-date-end') || { value: '' }).value || '';
+  
   var es = gid('es-sch');
   var tb = gid('tb-sch');
   var tf = gid('tf-sch');
@@ -1940,15 +1971,35 @@ function renderSRes() {
   
   if (tf) tf.style.display = 'none';
   
-  if (!q) {
+  // Check if any filter is active
+  var hasFilter = q || supplierFilter || dateStart || dateEnd;
+  
+  if (!hasFilter) {
     tb.innerHTML = '';
     es.style.display = 'block';
     es.querySelector('.em').textContent = '?';
-    es.querySelector('.em+div').textContent = '输入集装箱号搜索';
+    es.querySelector('.em+div').textContent = '输入搜索条件';
     return;
   }
   
-  var res = recs.filter(function(r) { return r.cn.indexOf(q) >= 0; }).sort(function(a, b) { return new Date(b.arr) - new Date(a.arr); });
+  // Filter records
+  var res = recs.filter(function(r) {
+    // Container number filter
+    var matchCn = !q || r.cn.indexOf(q) >= 0;
+    
+    // Supplier filter
+    var matchSup = !supplierFilter || (r.supplier && r.supplier.toUpperCase().indexOf(supplierFilter.toUpperCase()) >= 0);
+    
+    // Date range filter
+    var matchDate = true;
+    if (dateStart || dateEnd) {
+      var arrDate = r.arr ? r.arr.split('T')[0] : '';
+      if (dateStart && arrDate < dateStart) matchDate = false;
+      if (dateEnd && arrDate > dateEnd) matchDate = false;
+    }
+    
+    return matchCn && matchSup && matchDate;
+  }).sort(function(a, b) { return new Date(b.arr) - new Date(a.arr); });
   
   if (res.length === 0) {
     tb.innerHTML = '';
