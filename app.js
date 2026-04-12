@@ -1292,23 +1292,33 @@ function getSuppliers() {
 }
 function saveSuppliers(arr) {
   localStorage.setItem('cpms_suppliers', JSON.stringify(arr));
-  console.log('Saving suppliers to Firebase:', arr);
+  console.log('[DEBUG] Saving suppliers:', arr);
+  console.log('[DEBUG] db:', db);
+  console.log('[DEBUG] settingsRef:', settingsRef);
+  console.log('[DEBUG] currentUserUid:', currentUserUid);
+  
   // 确保 settingsRef 已初始化
-  if (!settingsRef && db) {
-    settingsRef = db.ref('cpms_settings');
-    console.log('Initialized settingsRef for suppliers');
+  if (!settingsRef) {
+    if (db) {
+      settingsRef = db.ref('cpms_settings');
+      console.log('[DEBUG] Created new settingsRef');
+    } else {
+      console.error('[DEBUG] db is null, cannot save to Firebase');
+      toast('Firebase 未连接', 'err');
+      return;
+    }
   }
+  
   if (settingsRef) {
     settingsRef.child('suppliers').set(arr).then(function() {
-      console.log('Suppliers saved to Firebase successfully');
-      toast('供应商已同步到云端', 'ok');
+      console.log('[DEBUG] Suppliers saved to Firebase');
+      toast('供应商已保存', 'ok');
     }).catch(function(err) {
-      console.error('Failed to save suppliers:', err);
-      toast('同步失败: ' + err.message, 'err');
+      console.error('[DEBUG] Firebase error:', err.code, err.message);
+      toast('保存失败: ' + err.code, 'err');
     });
   } else {
-    console.warn('settingsRef is null, suppliers saved locally only');
-    toast('已保存到本地（Firebase未连接）', 'ok');
+    toast('已保存到本地', 'ok');
   }
 }
 function getProducts() {
@@ -1316,7 +1326,22 @@ function getProducts() {
 }
 function saveProducts(arr) {
   localStorage.setItem('cpms_products', JSON.stringify(arr));
-  if (settingsRef) settingsRef.child('products').set(arr);
+  console.log('[DEBUG] Saving products:', arr);
+  
+  if (!settingsRef && db) {
+    settingsRef = db.ref('cpms_settings');
+  }
+  
+  if (settingsRef) {
+    settingsRef.child('products').set(arr).then(function() {
+      toast('品名已保存', 'ok');
+    }).catch(function(err) {
+      console.error('[DEBUG] Products save error:', err.code, err.message);
+      toast('保存失败: ' + err.code, 'err');
+    });
+  } else {
+    toast('已保存到本地', 'ok');
+  }
 }
 
 function acSupplierSearch(val) {
