@@ -1292,7 +1292,24 @@ function getSuppliers() {
 }
 function saveSuppliers(arr) {
   localStorage.setItem('cpms_suppliers', JSON.stringify(arr));
-  if (settingsRef) settingsRef.child('suppliers').set(arr);
+  console.log('Saving suppliers to Firebase:', arr);
+  // 确保 settingsRef 已初始化
+  if (!settingsRef && db) {
+    settingsRef = db.ref('cpms_settings');
+    console.log('Initialized settingsRef for suppliers');
+  }
+  if (settingsRef) {
+    settingsRef.child('suppliers').set(arr).then(function() {
+      console.log('Suppliers saved to Firebase successfully');
+      toast('供应商已同步到云端', 'ok');
+    }).catch(function(err) {
+      console.error('Failed to save suppliers:', err);
+      toast('同步失败: ' + err.message, 'err');
+    });
+  } else {
+    console.warn('settingsRef is null, suppliers saved locally only');
+    toast('已保存到本地（Firebase未连接）', 'ok');
+  }
 }
 function getProducts() {
   try { return JSON.parse(localStorage.getItem('cpms_products')) || []; } catch(e) { return []; }
