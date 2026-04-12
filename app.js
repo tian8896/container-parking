@@ -28,6 +28,14 @@ var currentUserUid = '';
 var currentUserRole = 'admin';
 
 // ============================================================
+// HELPERS
+// ============================================================
+function titleCase(str) {
+  if (!str) return '';
+  return str.trim().toLowerCase().replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+}
+
+// ============================================================
 // STATE
 // ============================================================
 var recs = [];
