@@ -1,0 +1,27 @@
+{
+  "rules": {
+    // 阶段 1：过渡期规则（先保证数据不丢失）
+    // 允许已认证用户读写，同时允许匿名读取现有数据
+    
+    "cpms_v2": {
+      // 允许所有人读取（过渡期）
+      ".read": true,
+      // 允许已认证用户写入
+      ".write": "auth != null",
+      "$recordId": {
+        // 新记录必须包含 owner
+        ".validate": "newData.hasChildren(['owner']) || data.exists()"
+      }
+    },
+    
+    "cpms_settings": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    
+    "cpms_users": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}
