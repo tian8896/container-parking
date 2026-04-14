@@ -248,12 +248,20 @@ function initSliderVerify() {
   var track = document.getElementById('sliderTrack');
   var fill = document.getElementById('sliderFill');
   var loginBtn = document.getElementById('loginBtn');
-  if (!slider || !btn) return;
+  if (!slider || !btn || !track) return;
+  
+  // 如果已经初始化过，先移除旧事件
+  if (slider.dataset.initialized === 'true') return;
+  slider.dataset.initialized = 'true';
   
   var isDragging = false;
   var startX = 0;
   var btnLeft = 0;
-  var trackWidth = track.offsetWidth - btn.offsetWidth;
+  
+  // 动态计算 trackWidth，因为初始化时可能元素未显示
+  function getTrackWidth() {
+    return track.offsetWidth - btn.offsetWidth;
+  }
   
   function onStart(e) {
     if (sliderVerified) return;
@@ -266,6 +274,7 @@ function initSliderVerify() {
   
   function onMove(e) {
     if (!isDragging || sliderVerified) return;
+    var trackWidth = getTrackWidth();
     var x = (e.touches ? e.touches[0].clientX : e.clientX);
     var diff = x - startX;
     var newLeft = Math.max(0, Math.min(trackWidth, btnLeft + diff));
@@ -275,6 +284,7 @@ function initSliderVerify() {
     // 检查是否到达终点
     if (newLeft >= trackWidth - 5) {
       sliderVerified = true;
+      isDragging = false;
       slider.classList.add('verified');
       btn.innerHTML = '✓';
       btn.classList.remove('dragging');
@@ -303,8 +313,8 @@ function initSliderVerify() {
   document.addEventListener('mouseup', onEnd);
   
   // 触摸事件
-  btn.addEventListener('touchstart', onStart);
-  document.addEventListener('touchmove', onMove);
+  btn.addEventListener('touchstart', onStart, { passive: false });
+  document.addEventListener('touchmove', onMove, { passive: false });
   document.addEventListener('touchend', onEnd);
 }
 
