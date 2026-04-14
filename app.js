@@ -2176,6 +2176,12 @@ function showEditInput(field) {
     content.innerHTML = '<label style="display:block;font-size:11px;color:var(--tx2);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">品名 Product Name</label><input type="text" id="edit-product-input" placeholder="输入搜索或添加新品名..." style="width:100%;background:var(--bg4);border:1px solid var(--bd);border-radius:5px;padding:10px 12px;color:var(--tx);font-family:Courier New,monospace;font-size:15px;outline:none" oninput="editProductAcSearch(this.value)" onblur="setTimeout(function(){hideAc(\'edit-product-ac\')},200)"><div class="autocomplete-list" id="edit-product-ac" style="position:absolute;z-index:500;background:var(--bg4);border:1px solid var(--ac);border-radius:0 0 4px 4px;max-height:180px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.5);display:none"></div>';
     hint.textContent = '当前值: ' + (r.products || []).join(', ') || '(空)';
     renderEditProductTags();
+  } else if (field === 'bay') {
+    var bayOptions = BAYS.map(function(b) {
+      return '<option value="' + b + '"' + (b == r.bay ? ' selected' : '') + '>Bay ' + b + '</option>';
+    }).join('');
+    content.innerHTML = '<label style="display:block;font-size:11px;color:var(--tx2);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">停车位 Bay</label><select id="edit-bay" style="width:100%;background:var(--bg4);border:1px solid var(--bd);border-radius:5px;padding:10px 12px;color:var(--tx);font-family:Courier New,monospace;font-size:15px;outline:none">' + bayOptions + '</select>';
+    hint.textContent = '当前值: Bay ' + r.bay + ' (费率: ' + getRate(r.bay) + ' AED/天)';
   }
 }
 
@@ -2265,11 +2271,22 @@ function execEditRec() {
     }
     r.products = editRecProducts.slice();
     changed = true;
+  } else if (field === 'bay') {
+    var newBay = parseInt((document.getElementById('edit-bay') || { value: '' }).value);
+    if (!newBay || BAYS.indexOf(newBay) === -1) {
+      msg.textContent = '请选择有效的停车位';
+      msg.style.display = 'block';
+      return;
+    }
+    if (newBay !== r.bay) {
+      r.bay = newBay;
+      changed = true;
+    }
   }
 
   if (changed) {
     saveToFirebase(r.id, r);
-    var fieldLabel = { cn: '集装箱号码', supplier: '供应商', products: '品名' };
+    var fieldLabel = { cn: '集装箱号码', supplier: '供应商', products: '品名', bay: '停车位' };
     toast((fieldLabel[field] || field) + ' 已修改', 'ok');
   }
   closeEditModal();
