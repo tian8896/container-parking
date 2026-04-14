@@ -134,7 +134,20 @@ tr:hover td{background:rgba(247,129,102,.03)}
 .login-btn{width:100%;padding:14px;background:var(--ac);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:bold;letter-spacing:1px;cursor:pointer;transition:all .2s;text-transform:uppercase;margin-top:8px}
 .login-btn:hover{background:#0052a3;box-shadow:0 4px 12px var(--ac15)}
 .login-btn:active{transform:scale(0.98)}
+.login-btn:disabled{background:#ccc;cursor:not-allowed;box-shadow:none}
 .login-error{color:var(--rd);font-size:12px;margin-top:12px;text-align:center;display:none}
+/* SLIDER VERIFY */
+.slider-verify{position:relative;width:100%;height:44px;margin:16px 0;background:#f5f5f5;border-radius:6px;overflow:hidden;user-select:none}
+.slider-track{position:absolute;inset:0;background:#e8e8e8;border-radius:6px;border:1px solid #ddd}
+.slider-tip{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#888;letter-spacing:1px;transition:opacity .3s}
+.slider-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#4caf50,#81c784);border-radius:6px 0 0 6px;transition:width .1s}
+.slider-btn{position:absolute;left:0;top:0;width:44px;height:44px;background:#fff;border:1px solid #ccc;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:left .1s,background .2s;font-size:16px;z-index:10}
+.slider-btn:hover{background:#f0f0f0}
+.slider-btn.dragging{cursor:grabbing;background:#e3f2fd;border-color:#2196f3}
+.slider-verify.verified .slider-track{background:#c8e6c9;border-color:#4caf50}
+.slider-verify.verified .slider-fill{width:100%;border-radius:6px}
+.slider-verify.verified .slider-btn{left:calc(100% - 44px);background:#4caf50;border-color:#4caf50;color:#fff;cursor:default}
+.slider-verify.verified .slider-tip{opacity:0}
 .login-error.show{display:block}
 /* BAY SETTINGS MODAL */
 .bay-settings-modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:2000;backdrop-filter:blur(4px)}
@@ -267,7 +280,16 @@ tr:hover td{background:rgba(247,129,102,.03)}
 <body>
 <!-- LOGIN SCREEN -->
 <div class="login-screen" id="loginScreen"><div class="login-box"><h2>🚢 系统登录</h2><p>Super Harvest Container Parking Management System</p><div class="fg"><label>邮箱 Email</label><input type="email" id="loginEmail" placeholder="输入邮箱" autocomplete="off"></div><div class="fg"><label>密码 Password</label><input type="password" id="loginPwd" placeholder="输入密码" autocomplete="off" style="padding-right:60px;position:relative">
-<div onclick="toggleLoginPwd()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#0066cc;font-size:12px" id="togglePwdBtn">显示</div></div><div id="loginErrorMsg" style="color:#cc0000;font-size:13px;margin:8px 0;display:none;text-align:center"></div><button onclick="doLogin()" class="login-btn">登 录 LOGIN</button><div style="margin:14px 0;padding:10px;background:#fff3cd;border:1px solid #ffeaa7;border-radius:6px;color:#856404;font-size:12px;text-align:center">💡 新用户请联系管理员添加账号<br>New users please contact admin</div></div></div><!-- SETTINGS MODAL (Bay + Account) -->
+<div onclick="toggleLoginPwd()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#0066cc;font-size:12px" id="togglePwdBtn">显示</div></div><div id="loginErrorMsg" style="color:#cc0000;font-size:13px;margin:8px 0;display:none;text-align:center"></div>
+<!-- 滑动验证 -->
+<div class="slider-verify" id="sliderVerify">
+  <div class="slider-track" id="sliderTrack">
+    <div class="slider-tip" id="sliderTip">➡️ 请按住滑块拖动到右侧验证</div>
+    <div class="slider-fill" id="sliderFill"></div>
+  </div>
+  <div class="slider-btn" id="sliderBtn">➡️</div>
+</div>
+<button onclick="doLogin()" class="login-btn" id="loginBtn" disabled style="opacity:.5;cursor:not-allowed">登 录 LOGIN</button><div style="margin:14px 0;padding:10px;background:#fff3cd;border:1px solid #ffeaa7;border-radius:6px;color:#856404;font-size:12px;text-align:center">💡 新用户请联系管理员添加账号<br>New users please contact admin</div></div></div><!-- SETTINGS MODAL (Bay + Account) -->
 <div class="bay-settings-modal" id="baySettingsModal">
   <div class="bay-settings-content">
 
@@ -534,6 +556,6 @@ tr:hover td{background:rgba(247,129,102,.03)}
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><script src="app.js?v=22"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><script src="app.js?v=23"></script>
 </body>
 </html>

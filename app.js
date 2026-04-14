@@ -224,6 +224,8 @@ function onFirebaseLoginSuccess() {
   initSuppliersProducts();
   loadBays();
   initApp();
+  // 重置滑动验证，为下次登录做准备
+  resetSliderVerify();
 }
 
 function onFirebaseLogout() {
@@ -238,8 +240,93 @@ function onFirebaseLogout() {
   if (rd) { rd.textContent = '-'; rd.style.background = '#666'; }
 }
 
+var sliderVerified = false;
+
+function initSliderVerify() {
+  var slider = document.getElementById('sliderVerify');
+  var btn = document.getElementById('sliderBtn');
+  var track = document.getElementById('sliderTrack');
+  var fill = document.getElementById('sliderFill');
+  var loginBtn = document.getElementById('loginBtn');
+  if (!slider || !btn) return;
+  
+  var isDragging = false;
+  var startX = 0;
+  var btnLeft = 0;
+  var trackWidth = track.offsetWidth - btn.offsetWidth;
+  
+  function onStart(e) {
+    if (sliderVerified) return;
+    isDragging = true;
+    startX = (e.touches ? e.touches[0].clientX : e.clientX);
+    btnLeft = btn.offsetLeft;
+    btn.classList.add('dragging');
+    e.preventDefault();
+  }
+  
+  function onMove(e) {
+    if (!isDragging || sliderVerified) return;
+    var x = (e.touches ? e.touches[0].clientX : e.clientX);
+    var diff = x - startX;
+    var newLeft = Math.max(0, Math.min(trackWidth, btnLeft + diff));
+    btn.style.left = newLeft + 'px';
+    fill.style.width = newLeft + 'px';
+    
+    // 检查是否到达终点
+    if (newLeft >= trackWidth - 5) {
+      sliderVerified = true;
+      slider.classList.add('verified');
+      btn.innerHTML = '✓';
+      btn.classList.remove('dragging');
+      if (loginBtn) {
+        loginBtn.disabled = false;
+        loginBtn.style.opacity = '1';
+        loginBtn.style.cursor = 'pointer';
+      }
+    }
+  }
+  
+  function onEnd() {
+    if (!isDragging || sliderVerified) return;
+    isDragging = false;
+    btn.classList.remove('dragging');
+    // 未验证成功，回弹
+    if (!sliderVerified) {
+      btn.style.left = '0px';
+      fill.style.width = '0px';
+    }
+  }
+  
+  // 鼠标事件
+  btn.addEventListener('mousedown', onStart);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onEnd);
+  
+  // 触摸事件
+  btn.addEventListener('touchstart', onStart);
+  document.addEventListener('touchmove', onMove);
+  document.addEventListener('touchend', onEnd);
+}
+
+function resetSliderVerify() {
+  sliderVerified = false;
+  var slider = document.getElementById('sliderVerify');
+  var btn = document.getElementById('sliderBtn');
+  var fill = document.getElementById('sliderFill');
+  var loginBtn = document.getElementById('loginBtn');
+  if (slider) slider.classList.remove('verified');
+  if (btn) { btn.style.left = '0px'; btn.innerHTML = '➡️'; }
+  if (fill) fill.style.width = '0px';
+  if (loginBtn) {
+    loginBtn.disabled = true;
+    loginBtn.style.opacity = '.5';
+    loginBtn.style.cursor = 'not-allowed';
+  }
+}
+
 function doLogin() {
   if (!firebaseAuthReady) { showLoginError('系统正在初始化，请稍候...'); return; }
+  if (!sliderVerified) { showLoginError('请先完成滑动验证'); return; }
   var email = document.getElementById('loginEmail').value.trim();
   var pwd = document.getElementById('loginPwd').value;
   if (!email || !pwd) { showLoginError('请输入邮箱和密码'); return; }
@@ -258,6 +345,7 @@ function doLogin() {
     })
     .catch(function(err) {
       if (btn) { btn.disabled = false; btn.textContent = '登录'; }
+      resetSliderVerify(); // 登录失败重置滑动验证
       var msg = '登录失败';
       if (err.code === 'auth/user-not-found') msg = '用户不存在';
       else if (err.code === 'auth/wrong-password') msg = '密码错误';
@@ -1114,6 +1202,8 @@ function startApp() {
     return;
   }
   initApp();
+  // 初始化滑动验证
+  setTimeout(initSliderVerify, 500);
 }
 
 function initApp() {
