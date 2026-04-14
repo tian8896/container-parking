@@ -325,7 +325,7 @@ function resetSliderVerify() {
   var fill = document.getElementById('sliderFill');
   var loginBtn = document.getElementById('loginBtn');
   if (slider) slider.classList.remove('verified');
-  if (btn) { btn.style.left = '0px'; btn.innerHTML = '➡️'; }
+  if (btn) { btn.style.left = '2px'; btn.innerHTML = '➡️'; }
   if (fill) fill.style.width = '0px';
   if (loginBtn) {
     loginBtn.disabled = true;
@@ -1212,8 +1212,6 @@ function startApp() {
     return;
   }
   initApp();
-  // 初始化滑动验证
-  setTimeout(initSliderVerify, 500);
 }
 
 function initApp() {
