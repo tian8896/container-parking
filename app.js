@@ -1315,7 +1315,7 @@ function calcFee(a, b, bayId) {
     // Before 23:00 - first day counts to midnight
     days = 1;
     currentDate.setDate(currentDate.getDate() + 1);
-    while (currentDate < depDate) {
+    while (currentDate <= depDate) {
       days++;
       currentDate.setDate(currentDate.getDate() + 1);
     }
