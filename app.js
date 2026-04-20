@@ -72,6 +72,13 @@ function titleCase(str) {
   if (!str) return '';
   return str.trim().toLowerCase().replace(/\b\w/g, function(c) { return c.toUpperCase(); });
 }
+function esc(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
 
 // ============================================================
 // STATE
@@ -2466,6 +2473,7 @@ function renderMS() {
   var totalCount = done.length;
   var totalRev = done.reduce(function(s, r) { return s + (r.fee || 0); }, 0);
   var totalDays = done.reduce(function(s, r) { return s + calcDur(r.arr, r.dep).dd; }, 0);
+  var selectedLabel = gid('monthly-selected-label');
   
   var mc = gid('mc-c');
   var mr = gid('mc-r');
@@ -2477,6 +2485,111 @@ function renderMS() {
   mc.textContent = totalCount;
   mr.textContent = totalRev.toLocaleString();
   md.textContent = Math.round(totalDays);
+  if (selectedLabel) selectedLabel.textContent = year + '.' + String(mon).padStart(2, '0');
+
+  var monthUsedBaysMap = {};
+  done.forEach(function(r) { monthUsedBaysMap[r.bay] = true; });
+  var monthUsedBays = BAYS.filter(function(b) { return !!monthUsedBaysMap[b]; });
+  var monthIdleBays = BAYS.filter(function(b) { return !monthUsedBaysMap[b]; });
+  var currentActiveRecs = recs.filter(function(r) { return !r.dep; });
+  var occupiedNowMap = {};
+  currentActiveRecs.forEach(function(r) { occupiedNowMap[r.bay] = r; });
+  var occupiedNowBays = BAYS.filter(function(b) { return !!occupiedNowMap[b]; });
+  var availableNowBays = BAYS.filter(function(b) { return !occupiedNowMap[b]; });
+
+  var usedEl = gid('mc-used-bays');
+  var occNowEl = gid('mc-occ-now');
+  var freeNowEl = gid('mc-free-now');
+  if (usedEl) usedEl.textContent = monthUsedBays.length;
+  if (occNowEl) occNowEl.textContent = occupiedNowBays.length;
+  if (freeNowEl) freeNowEl.textContent = availableNowBays.length;
+
+  var monthlyActiveBays = gid('monthly-active-bays');
+  var monthlyIdleBays = gid('monthly-idle-bays');
+  var monthlyOccupiedBays = gid('monthly-occupied-bays');
+  var monthlyAvailableBays = gid('monthly-available-bays');
+  if (monthlyActiveBays) monthlyActiveBays.textContent = monthUsedBays.length;
+  if (monthlyIdleBays) monthlyIdleBays.textContent = monthIdleBays.length;
+  if (monthlyOccupiedBays) monthlyOccupiedBays.textContent = occupiedNowBays.length;
+  if (monthlyAvailableBays) monthlyAvailableBays.textContent = availableNowBays.length;
+
+  function renderBayTags(targetId, bays, cls) {
+    var el = gid(targetId);
+    if (!el) return;
+    if (!bays.length) {
+      el.innerHTML = '<span class="bay-mini-tag">None</span>';
+      return;
+    }
+    el.innerHTML = bays.map(function(bay) {
+      return '<span class="bay-mini-tag' + (cls ? ' ' + cls : '') + '">Bay ' + bay + '</span>';
+    }).join('');
+  }
+
+  renderBayTags('monthly-active-tags', monthUsedBays, '');
+  renderBayTags('monthly-idle-tags', monthIdleBays, '');
+  renderBayTags('monthly-occupied-tags', occupiedNowBays, 'occupied');
+  renderBayTags('monthly-available-tags', availableNowBays, 'available');
+
+  var bayStats = BAYS.map(function(bayId) {
+    var bayDone = done.filter(function(r) { return r.bay === bayId; });
+    var bayRevenue = bayDone.reduce(function(s, r) { return s + (r.fee || 0); }, 0);
+    var bayDays = bayDone.reduce(function(s, r) { return s + calcDur(r.arr, r.dep).dd; }, 0);
+    return {
+      bay: bayId,
+      count: bayDone.length,
+      revenue: bayRevenue,
+      days: bayDays
+    };
+  });
+  var topRevenueBay = bayStats.slice().sort(function(a, b) { return b.revenue - a.revenue; })[0] || { bay: '--', revenue: 0, count: 0 };
+  var longStayBay = bayStats.slice().sort(function(a, b) { return b.days - a.days; })[0] || { bay: '--', days: 0, count: 0 };
+  var occRate = BAYS.length ? Math.round((occupiedNowBays.length / BAYS.length) * 100) : 0;
+  var signalTop = gid('monthly-signal-top-bay');
+  var signalTopSub = gid('monthly-signal-top-bay-sub');
+  var signalLong = gid('monthly-signal-long-bay');
+  var signalLongSub = gid('monthly-signal-long-bay-sub');
+  var signalOcc = gid('monthly-signal-occ-rate');
+  var signalOccSub = gid('monthly-signal-occ-rate-sub');
+  if (signalTop) signalTop.textContent = topRevenueBay.bay === '--' ? '--' : ('Bay ' + topRevenueBay.bay);
+  if (signalTopSub) signalTopSub.textContent = topRevenueBay.revenue > 0 ? (topRevenueBay.revenue.toLocaleString() + ' AED · ' + topRevenueBay.count + ' stays') : '本月暂无收入记录';
+  if (signalLong) signalLong.textContent = longStayBay.bay === '--' ? '--' : ('Bay ' + longStayBay.bay);
+  if (signalLongSub) signalLongSub.textContent = longStayBay.days > 0 ? (Math.round(longStayBay.days) + ' days accumulated') : '本月暂无停靠时长数据';
+  if (signalOcc) signalOcc.textContent = occRate + '%';
+  if (signalOccSub) signalOccSub.textContent = occupiedNowBays.length + ' / ' + BAYS.length + ' bays occupied now';
+
+  var leaderEl = gid('monthly-revenue-leaders');
+  if (leaderEl) {
+    var leaders = bayStats.slice().sort(function(a, b) { return b.revenue - a.revenue; }).filter(function(x) { return x.revenue > 0; }).slice(0, 5);
+    if (!leaders.length) {
+      leaderEl.innerHTML = '<div class="leader-row"><div class="left"><div class="name">No Revenue Yet</div><div class="meta">本月暂无完成出场记录</div></div><div class="amt">0</div></div>';
+    } else {
+      leaderEl.innerHTML = leaders.map(function(item, idx) {
+        return '<div class="leader-row"><div class="left"><div class="name">#' + (idx + 1) + ' Bay ' + item.bay + '</div><div class="meta">' + item.count + ' stays · ' + Math.round(item.days) + ' days</div></div><div class="amt">' + item.revenue.toLocaleString() + '</div></div>';
+      }).join('');
+    }
+  }
+
+  var liveBoard = gid('monthly-bay-live');
+  if (liveBoard) {
+    liveBoard.innerHTML = BAYS.map(function(bayId) {
+      var activeRec = occupiedNowMap[bayId];
+      var bayDone = done.filter(function(r) { return r.bay === bayId; });
+      var bayMonthRev = bayDone.reduce(function(s, r) { return s + (r.fee || 0); }, 0);
+      var bayMonthCnt = bayDone.length;
+      var isOccupied = !!activeRec;
+      var dur = activeRec ? calcDur(activeRec.arr, null) : null;
+      return '<div class="bay-neon-card ' + (isOccupied ? 'occupied' : 'available') + '">' +
+        '<div class="bay-id">Bay ' + bayId + '</div>' +
+        '<div class="bay-status">' + (isOccupied ? '● Occupied' : '○ Available') + '</div>' +
+        '<div class="bay-meta">' +
+          (isOccupied
+            ? '<div><strong>' + esc(activeRec.cn || '-') + '</strong></div><div>' + esc(activeRec.supplier || '-') + '</div><div>In Yard ' + esc(dur.t) + '</div>'
+            : '<div><strong>No container</strong></div><div>Ready for next arrival</div><div>Idle now</div>') +
+          '<div style="margin-top:8px">Month stays <strong>' + bayMonthCnt + '</strong></div>' +
+          '<div>Month revenue <strong>' + bayMonthRev.toLocaleString() + ' AED</strong></div>' +
+        '</div></div>';
+    }).join('');
+  }
   
   grid.innerHTML = BAYS.map(function(bayId) {
     var br = done.filter(function(r) { return r.bay === bayId; });
@@ -2497,9 +2610,96 @@ function renderMS() {
 // ============================================================
 var chartBar = null, chartLine = null, chartPieDaily = null, chartPieMonthly = null, chartMixed = null;
 
-var CHART_COLORS = ['#0066cc','#ff6633','#33cc66','#ff9933','#cc3366','#6633cc','#009999','#ff3366','#996633','#336699'];
+var CHART_COLORS = ['#2dd4ff','#7c4dff','#00e5a8','#ffb020','#ff5c93','#00c2ff','#8cff66','#ff7b72','#40c4ff','#9b7dff'];
+var CHART_FILL_COLORS = ['rgba(45,212,255,.35)','rgba(124,77,255,.28)','rgba(0,229,168,.28)','rgba(255,176,32,.28)','rgba(255,92,147,.28)','rgba(0,194,255,.28)','rgba(140,255,102,.22)','rgba(255,123,114,.24)','rgba(64,196,255,.24)','rgba(155,125,255,.24)'];
 
 var STANDARD_BAYS = [80, 81, 83, 84, 85];
+
+function getChartCanvas(id) {
+  return document.getElementById(id);
+}
+function makeLinearGradient(canvas, c1, c2) {
+  if (!canvas || !canvas.getContext) return c1;
+  var ctx = canvas.getContext('2d');
+  var g = ctx.createLinearGradient(0, 0, 0, canvas.height || 260);
+  g.addColorStop(0, c1);
+  g.addColorStop(1, c2);
+  return g;
+}
+function makeRadialGradient(canvas, c1, c2) {
+  if (!canvas || !canvas.getContext) return c1;
+  var ctx = canvas.getContext('2d');
+  var g = ctx.createRadialGradient((canvas.width || 320) / 2, (canvas.height || 320) / 2, 20, (canvas.width || 320) / 2, (canvas.height || 320) / 2, (canvas.width || 320) / 2);
+  g.addColorStop(0, c1);
+  g.addColorStop(1, c2);
+  return g;
+}
+function chartCommonOptions(extra) {
+  var base = {
+    responsive: true,
+    maintainAspectRatio: true,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          color: '#163c5e',
+          usePointStyle: true,
+          pointStyle: 'circle',
+          padding: 16,
+          font: { size: 12, weight: 'bold' }
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(9,23,43,.92)',
+        borderColor: 'rgba(45,212,255,.45)',
+        borderWidth: 1,
+        titleColor: '#dff7ff',
+        bodyColor: '#f3fbff',
+        padding: 12,
+        displayColors: true
+      }
+    },
+    scales: {
+      x: {
+        ticks: { color: '#5d7690', maxRotation: 0, autoSkip: true },
+        grid: { color: 'rgba(23,60,94,.08)', drawBorder: false }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: { color: '#5d7690' },
+        grid: { color: 'rgba(23,60,94,.1)', drawBorder: false }
+      }
+    }
+  };
+  if (!extra) return base;
+  function merge(target, source) {
+    Object.keys(source).forEach(function(k) {
+      if (source[k] && typeof source[k] === 'object' && !Array.isArray(source[k])) {
+        if (!target[k] || typeof target[k] !== 'object') target[k] = {};
+        merge(target[k], source[k]);
+      } else {
+        target[k] = source[k];
+      }
+    });
+    return target;
+  }
+  return merge(base, extra);
+}
+var chartGlowPlugin = {
+  id: 'chartGlowPlugin',
+  beforeDatasetsDraw: function(chart) {
+    var ctx = chart.ctx;
+    ctx.save();
+    ctx.shadowColor = 'rgba(45,212,255,.18)';
+    ctx.shadowBlur = 14;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+  },
+  afterDatasetsDraw: function(chart) {
+    chart.ctx.restore();
+  }
+};
 
 function isStandardBay(bayId) {
   return STANDARD_BAYS.indexOf(bayId) !== -1;
@@ -2507,6 +2707,9 @@ function isStandardBay(bayId) {
 
 function renderMonthlyCharts(doneRecs, allBays) {
   if (typeof Chart === 'undefined') return;
+  if (Chart && Chart.register) {
+    try { Chart.register(chartGlowPlugin); } catch (eReg) {}
+  }
   
   // Collect all month keys from completed records
   var allMonths = {};
@@ -2543,24 +2746,27 @@ function renderMonthlyCharts(doneRecs, allBays) {
   var dayKeys = Object.keys(allDays).sort();
 
   if (dayKeys.length > 0 && standardBays.length > 0) {
+    var barCanvas = getChartCanvas('barChart');
     var datasets = standardBays.map(function(bayId, i) {
       return {
         label: 'Bay ' + bayId,
         data: dayKeys.map(function(dk) {
           return (allDays[dk] && allDays[dk][String(bayId)]) ? allDays[dk][String(bayId)] : 0;
         }),
-        backgroundColor: CHART_COLORS[i % CHART_COLORS.length],
-        borderRadius: 4
+        backgroundColor: makeLinearGradient(barCanvas, CHART_FILL_COLORS[i % CHART_FILL_COLORS.length], 'rgba(255,255,255,.04)'),
+        borderColor: CHART_COLORS[i % CHART_COLORS.length],
+        borderWidth: 1,
+        borderRadius: 8,
+        borderSkipped: false,
+        maxBarThickness: 28
       };
     });
 
-    chartBar = new Chart(document.getElementById('barChart'), {
+    chartBar = new Chart(barCanvas, {
       type: 'bar',
       data: { labels: dayKeys, datasets: datasets },
-      options: {
-        responsive: true,
+      options: chartCommonOptions({
         plugins: {
-          legend: { position: 'top', labels: { font: { size: 13, weight: 'bold' } } },
           tooltip: {
             callbacks: {
               label: function(ctx) {
@@ -2570,10 +2776,10 @@ function renderMonthlyCharts(doneRecs, allBays) {
           }
         },
         scales: {
-          x: { stacked: true, title: { display: true, text: 'Date' } },
-          y: { stacked: true, beginAtZero: true, title: { display: true, text: 'AED' } }
+          x: { stacked: true, title: { display: true, text: 'Date', color: '#4f6f8d' } },
+          y: { stacked: true, beginAtZero: true, title: { display: true, text: 'AED', color: '#4f6f8d' } }
         }
-      }
+      })
     });
   }
   
@@ -2583,6 +2789,7 @@ function renderMonthlyCharts(doneRecs, allBays) {
   if (chartLine) chartLine.destroy();
   
   if (monthKeys.length > 0 && otherBays.length > 0) {
+    var lineCanvas = getChartCanvas('lineChart');
     var lineDatasets = otherBays.map(function(bayId, i) {
       return {
         label: 'Bay ' + bayId,
@@ -2590,22 +2797,22 @@ function renderMonthlyCharts(doneRecs, allBays) {
           return (allMonths[mk] && allMonths[mk][String(bayId)]) ? allMonths[mk][String(bayId)] : 0;
         }),
         borderColor: CHART_COLORS[(i + 5) % CHART_COLORS.length],
-        backgroundColor: CHART_COLORS[(i + 5) % CHART_COLORS.length] + '22',
-        fill: false,
-        tension: 0.3,
+        backgroundColor: makeLinearGradient(lineCanvas, CHART_FILL_COLORS[(i + 5) % CHART_FILL_COLORS.length], 'rgba(255,255,255,.02)'),
+        fill: true,
+        tension: 0.42,
         pointBackgroundColor: CHART_COLORS[(i + 5) % CHART_COLORS.length],
-        pointRadius: 5,
-        pointHoverRadius: 8
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 7
       };
     });
     
-    chartLine = new Chart(document.getElementById('lineChart'), {
+    chartLine = new Chart(lineCanvas, {
       type: 'line',
       data: { labels: monthKeys, datasets: lineDatasets },
-      options: {
-        responsive: true,
+      options: chartCommonOptions({
         plugins: {
-          legend: { position: 'top', labels: { font: { size: 13, weight: 'bold' } } },
           tooltip: {
             callbacks: {
               label: function(ctx) {
@@ -2615,10 +2822,10 @@ function renderMonthlyCharts(doneRecs, allBays) {
           }
         },
         scales: {
-          y: { beginAtZero: true, title: { display: true, text: 'AED' } },
-          x: { title: { display: true, text: 'Month' } }
+          y: { beginAtZero: true, title: { display: true, text: 'AED', color: '#4f6f8d' } },
+          x: { title: { display: true, text: 'Month', color: '#4f6f8d' } }
         }
-      }
+      })
     });
   }
   
@@ -2662,21 +2869,24 @@ function renderMonthlyCharts(doneRecs, allBays) {
     });
 
     if (pieDailyData.length > 0) {
-      chartPieDaily = new Chart(document.getElementById('pieDaily'), {
+      var pieDailyCanvas = getChartCanvas('pieDaily');
+      chartPieDaily = new Chart(pieDailyCanvas, {
         type: 'doughnut',
         data: {
           labels: pieDailyLabels,
           datasets: [{
             data: pieDailyData,
-            backgroundColor: CHART_COLORS.slice(0, pieDailyLabels.length),
+            backgroundColor: pieDailyLabels.map(function(_, i) {
+              return makeRadialGradient(pieDailyCanvas, CHART_FILL_COLORS[i % CHART_FILL_COLORS.length], CHART_COLORS[i % CHART_COLORS.length]);
+            }),
             borderWidth: 2,
-            borderColor: '#fff'
+            borderColor: '#fff',
+            hoverOffset: 10
           }]
         },
-        options: {
-          responsive: true,
+        options: chartCommonOptions({
           plugins: {
-            legend: { position: 'right', labels: { font: { size: 12, weight: 'bold' } } },
+            legend: { position: 'right' },
             tooltip: {
               callbacks: {
                 label: function(ctx) {
@@ -2687,7 +2897,7 @@ function renderMonthlyCharts(doneRecs, allBays) {
               }
             }
           }
-        }
+        })
       });
     }
   }
@@ -2718,21 +2928,24 @@ function renderMonthlyCharts(doneRecs, allBays) {
     });
 
     if (pieMonthlyData.length > 0) {
-      chartPieMonthly = new Chart(document.getElementById('pieMonthly'), {
+      var pieMonthlyCanvas = getChartCanvas('pieMonthly');
+      chartPieMonthly = new Chart(pieMonthlyCanvas, {
         type: 'doughnut',
         data: {
           labels: pieMonthlyLabels,
           datasets: [{
             data: pieMonthlyData,
-            backgroundColor: CHART_COLORS.slice(0, pieMonthlyLabels.length),
+            backgroundColor: pieMonthlyLabels.map(function(_, i) {
+              return makeRadialGradient(pieMonthlyCanvas, CHART_FILL_COLORS[(i + 2) % CHART_FILL_COLORS.length], CHART_COLORS[(i + 2) % CHART_COLORS.length]);
+            }),
             borderWidth: 2,
-            borderColor: '#fff'
+            borderColor: '#fff',
+            hoverOffset: 10
           }]
         },
-        options: {
-          responsive: true,
+        options: chartCommonOptions({
           plugins: {
-            legend: { position: 'right', labels: { font: { size: 12, weight: 'bold' } } },
+            legend: { position: 'right' },
             tooltip: {
               callbacks: {
                 label: function(ctx) {
@@ -2743,7 +2956,7 @@ function renderMonthlyCharts(doneRecs, allBays) {
               }
             }
           }
-        }
+        })
       });
     }
   }
@@ -2798,8 +3011,10 @@ function renderMonthlyCharts(doneRecs, allBays) {
         }),
         borderColor: CHART_COLORS[i % CHART_COLORS.length],
         backgroundColor: 'transparent',
-        tension: 0.3,
+        tension: 0.42,
         pointBackgroundColor: CHART_COLORS[i % CHART_COLORS.length],
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
         pointRadius: 4,
         pointHoverRadius: 6,
         spanGaps: true,
@@ -2819,24 +3034,26 @@ function renderMonthlyCharts(doneRecs, allBays) {
           }
           return 0;
         }),
-        backgroundColor: CHART_COLORS[(i + 5) % CHART_COLORS.length] + 'aa',
-        borderRadius: 4,
+        backgroundColor: CHART_FILL_COLORS[(i + 5) % CHART_FILL_COLORS.length],
+        borderColor: CHART_COLORS[(i + 5) % CHART_COLORS.length],
+        borderWidth: 1,
+        borderRadius: 6,
         yAxisID: 'y'
       };
     });
 
-    chartMixed = new Chart(document.getElementById('mixedChart'), {
+    chartMixed = new Chart(getChartCanvas('mixedChart'), {
       type: 'bar',
       data: { labels: allLabels, datasets: lineDatasets.concat(barDatasets) },
-      options: {
-        responsive: true,
+      options: chartCommonOptions({
         plugins: {
           legend: { 
             position: 'top', 
             labels: { 
+              color: '#163c5e',
+              usePointStyle: true,
               font: { size: 11, weight: 'bold' },
               filter: function(legendItem, chartData) {
-                // Only show unique labels
                 return true;
               }
             } 
@@ -2852,10 +3069,10 @@ function renderMonthlyCharts(doneRecs, allBays) {
           }
         },
         scales: {
-          y: { beginAtZero: true, title: { display: true, text: 'AED' } },
-          x: { title: { display: true, text: 'Date (Line: Daily) / Month (Bar: Monthly)' } }
+          y: { beginAtZero: true, title: { display: true, text: 'AED', color: '#4f6f8d' } },
+          x: { title: { display: true, text: 'Date (Line: Daily) / Month (Bar: Monthly)', color: '#4f6f8d' } }
         }
-      }
+      })
     });
   }
 }

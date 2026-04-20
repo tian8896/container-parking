@@ -94,6 +94,118 @@ tr:hover td{background:rgba(247,129,102,.03)}
 .sr .sl{color:var(--tx2)}
 .sr .sv{color:var(--tx)}
 .sr:last-child .sv{color:var(--am);font-size:16px}
+#tc-monthly{position:relative;padding:24px;overflow:auto;background:
+radial-gradient(circle at 16% 14%,rgba(255,255,255,.5),transparent 26%),
+radial-gradient(circle at 86% 10%,rgba(111,199,255,.28),transparent 24%),
+linear-gradient(180deg,#dff4ff 0%,#cdeeff 42%,#b9e7ff 100%)}
+#tc-monthly::before{content:'';position:absolute;inset:0;background:
+linear-gradient(90deg,rgba(74,144,226,.06) 1px,transparent 1px),
+linear-gradient(0deg,rgba(74,144,226,.05) 1px,transparent 1px);
+background-size:48px 48px,48px 48px;opacity:.4;pointer-events:none}
+#tc-monthly::after{content:'';position:absolute;inset:16px;border:1px solid rgba(82,194,255,.18);border-radius:24px;box-shadow:0 0 0 1px rgba(8,42,74,.06),inset 0 0 60px rgba(0,181,255,.06);pointer-events:none}
+.monthly-shell{position:relative;display:flex;flex-direction:column;gap:20px;z-index:1}
+.monthly-hero{position:relative;overflow:hidden;background:
+radial-gradient(circle at 20% 18%,rgba(255,255,255,.42),transparent 30%),
+radial-gradient(circle at 78% 0%,rgba(107,194,255,.22),transparent 30%),
+linear-gradient(135deg,rgba(255,255,255,.56),rgba(229,246,255,.78) 56%,rgba(211,239,255,.9));
+border:1px solid rgba(71,201,255,.34);border-radius:24px;padding:28px 28px 22px;
+box-shadow:0 0 0 1px rgba(44,118,174,.08),0 18px 42px rgba(0,0,0,.04),inset 0 0 30px rgba(34,173,255,.025)}
+.monthly-hero::before{content:'';position:absolute;inset:0;background:
+linear-gradient(90deg,transparent 0,rgba(72,195,255,.07) 50%,transparent 100%),
+repeating-linear-gradient(90deg,transparent,transparent 78px,rgba(51,157,217,.08) 78px,rgba(51,157,217,.08) 79px),
+repeating-linear-gradient(0deg,transparent,transparent 52px,rgba(51,157,217,.05) 52px,rgba(51,157,217,.05) 53px);
+mix-blend-mode:screen;pointer-events:none}
+.monthly-hero::after{content:'';position:absolute;left:20px;right:20px;top:18px;height:1px;background:linear-gradient(90deg,transparent,rgba(89,223,255,.7),transparent);opacity:.9}
+.monthly-hero-top{position:relative;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+.monthly-kicker{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#2877a8;margin-bottom:10px;text-shadow:none}
+.monthly-title{font-size:42px;font-weight:bold;line-height:1.05;color:#0e3d63;letter-spacing:2px;text-transform:uppercase;text-shadow:none}
+.monthly-sub{margin-top:12px;font-size:13px;line-height:1.85;color:#3d6585;max-width:760px;text-shadow:none}
+.monthly-chip-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.monthly-chip{padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.58);border:1px solid rgba(90,206,255,.28);color:#2472a4;font-size:11px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;box-shadow:inset 0 0 12px rgba(63,185,255,.04)}
+.monthly-control-card{position:relative;min-width:280px;background:linear-gradient(180deg,rgba(255,255,255,.65),rgba(226,244,255,.82));border:1px solid rgba(92,206,255,.32);border-radius:18px;padding:16px 18px 18px;box-shadow:inset 0 0 18px rgba(50,184,255,.04),0 12px 28px rgba(25,102,156,.08)}
+.monthly-control-card::before{content:'';position:absolute;inset:10px;border:1px solid rgba(86,194,255,.12);border-radius:12px;pointer-events:none}
+.monthly-control-card .cap{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#3781b3;margin-bottom:10px;text-shadow:none}
+.monthly-control-card .val{font-size:26px;font-weight:bold;color:#0f3e62;text-shadow:none}
+.monthly-control-card select{background:rgba(255,255,255,.78)!important;border:1px solid rgba(76,188,255,.34)!important;color:#12486f!important}
+.monthly-control-card .btn{border-radius:10px}
+.monthly-control-card .btn-g{background:rgba(255,255,255,.72);color:#2773a5;border:1px solid rgba(76,188,255,.32)}
+.monthly-control-card .btn-g:hover{border-color:#59d4ff;color:#fff;background:rgba(16,69,109,.95)}
+.monthly-control-card .btn-d{background:linear-gradient(135deg,rgba(255,238,242,.72),rgba(255,229,236,.7));border:1px solid rgba(255,112,146,.24);color:#9c3b54}
+.monthly-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;position:relative;margin-top:22px}
+.monthly-metric{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(227,245,255,.82));border:1px solid rgba(75,190,255,.24);border-radius:18px;padding:16px 16px 14px;box-shadow:inset 0 0 16px rgba(44,171,255,.03),0 12px 24px rgba(25,102,156,.06)}
+.monthly-metric::before{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,rgba(80,228,255,.95),transparent)}
+.monthly-metric .lab{font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:#3e84b2;text-shadow:none}
+.monthly-metric .num{font-size:30px;font-weight:bold;color:#0f3d61;margin-top:9px;text-shadow:none}
+.monthly-metric .sub{font-size:12px;color:#4b7090;margin-top:7px;line-height:1.55;text-shadow:none}
+.monthly-board-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+.monthly-board{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(226,243,255,.82));border:1px solid rgba(79,196,255,.28);border-radius:22px;padding:20px;box-shadow:inset 0 0 26px rgba(49,190,255,.03),0 12px 28px rgba(25,102,156,.06)}
+.monthly-board::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 15% 0,rgba(47,199,255,.1),transparent 30%);pointer-events:none}
+.monthly-board-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
+.monthly-board-title h3{font-size:15px;color:#113f63;letter-spacing:1.8px;text-transform:uppercase;text-shadow:none}
+.monthly-board-title span{font-size:11px;color:#4588b4;letter-spacing:1.4px;text-transform:uppercase;text-shadow:none}
+.bay-neon-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.bay-neon-card{position:relative;overflow:hidden;border-radius:16px;padding:16px 16px 14px;border:1px solid rgba(93,203,255,.2);background:linear-gradient(180deg,rgba(255,255,255,.58),rgba(228,244,255,.8));min-height:176px}
+.bay-neon-card::before{content:'';position:absolute;left:-18%;top:-34%;width:160px;height:160px;background:radial-gradient(circle,rgba(72,209,255,.22),transparent 68%);opacity:.85}
+.bay-neon-card::after{content:'';position:absolute;inset:10px;border:1px solid rgba(90,206,255,.08);border-radius:12px;pointer-events:none}
+.bay-neon-card.occupied{border-color:rgba(255,170,62,.5);box-shadow:0 0 0 1px rgba(255,175,77,.12),0 0 26px rgba(255,157,0,.1),inset 0 0 18px rgba(255,144,0,.06)}
+.bay-neon-card.available{border-color:rgba(84,224,255,.32);box-shadow:0 0 0 1px rgba(82,219,255,.08),0 0 28px rgba(23,156,255,.08),inset 0 0 20px rgba(22,184,255,.06)}
+.bay-neon-card .bay-id{position:relative;font-size:24px;font-weight:bold;color:#123f61;letter-spacing:1px;text-shadow:none}
+.bay-neon-card .bay-status{position:relative;display:inline-flex;align-items:center;gap:6px;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;margin-top:8px;padding:5px 10px;border-radius:999px}
+.bay-neon-card.occupied .bay-status{background:rgba(255,164,54,.12);color:#ffbe66;border:1px solid rgba(255,190,102,.2)}
+.bay-neon-card.available .bay-status{background:rgba(52,199,255,.1);color:#7fe6ff;border:1px solid rgba(71,214,255,.18)}
+.bay-neon-card .bay-meta{position:relative;margin-top:14px;font-size:13px;color:#496e8d;line-height:1.7;text-shadow:none}
+.bay-neon-card .bay-meta strong{color:#143f62}
+.bay-mini-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bay-mini-panel{border:1px solid rgba(78,193,255,.18);border-radius:16px;padding:14px;background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(229,245,255,.82));box-shadow:inset 0 0 14px rgba(42,179,255,.03)}
+.bay-mini-panel h4{font-size:11px;color:#3c82b0;letter-spacing:1.8px;text-transform:uppercase;margin-bottom:10px;text-shadow:none}
+.bay-mini-panel .big{font-size:28px;font-weight:bold;color:#0f3d61;margin-bottom:5px;text-shadow:none}
+.bay-mini-panel .desc{font-size:12px;color:#4a6e8c;line-height:1.5;text-shadow:none}
+.bay-mini-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.bay-mini-tag{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:bold;border:1px solid rgba(85,205,255,.2);background:rgba(255,255,255,.72);color:#256f9f;text-shadow:none}
+.bay-mini-tag.occupied{background:rgba(74,39,13,.03);border-color:rgba(255,193,99,.22);color:#ffd89a}
+.bay-mini-tag.available{background:rgba(7,47,58,.03);border-color:rgba(117,241,255,.16);color:#b1f7ff}
+.monthly-chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.chart-tech-card{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(228,244,255,.82));border:1px solid rgba(80,194,255,.24);border-radius:20px;padding:18px;box-shadow:inset 0 0 18px rgba(40,175,255,.03),0 12px 26px rgba(25,102,156,.06)}
+.chart-tech-card.full{grid-column:1/-1}
+.chart-tech-card::before{content:'';position:absolute;inset:0;background:
+linear-gradient(135deg,rgba(79,221,255,.06),transparent 34%),
+radial-gradient(circle at top right,rgba(0,149,255,.12),transparent 32%);
+pointer-events:none}
+.chart-tech-title{position:relative;font-size:13px;font-weight:bold;margin-bottom:14px;color:#123f62;letter-spacing:1.6px;text-transform:uppercase;text-shadow:none}
+.chart-tech-card canvas{position:relative;filter:drop-shadow(0 0 10px rgba(60,196,255,.08))}
+.fusion-board{display:grid;grid-template-columns:330px 1fr;gap:20px;align-items:start}
+.fusion-side{display:flex;flex-direction:column;gap:18px}
+.fusion-panel{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(229,245,255,.82));border:1px solid rgba(79,196,255,.24);border-radius:22px;padding:18px;box-shadow:inset 0 0 18px rgba(41,174,255,.03),0 12px 26px rgba(25,102,156,.06)}
+.fusion-panel::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at top right,rgba(45,212,255,.09),transparent 30%);pointer-events:none}
+.fusion-panel h3{position:relative;font-size:14px;color:#123f62;letter-spacing:1.8px;text-transform:uppercase;margin-bottom:14px;text-shadow:none}
+.signal-stack{display:flex;flex-direction:column;gap:12px;position:relative}
+.signal-card{padding:13px 13px 11px;border:1px solid rgba(79,196,255,.18);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(232,247,255,.84))}
+.signal-card .lab{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:#4287b5;text-shadow:none}
+.signal-card .val{font-size:22px;font-weight:bold;color:#123f62;margin-top:5px;text-shadow:none}
+.signal-card .sub{font-size:12px;color:#4d7291;margin-top:6px;line-height:1.55;text-shadow:none}
+.leader-list{display:flex;flex-direction:column;gap:10px;position:relative}
+.leader-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 13px;border:1px solid rgba(79,196,255,.16);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(232,247,255,.84))}
+.leader-row .left{display:flex;flex-direction:column;gap:4px;min-width:0}
+.leader-row .name{font-size:14px;font-weight:bold;color:#123f62;text-shadow:none}
+.leader-row .meta{font-size:11px;color:#4c7290;text-shadow:none}
+.leader-row .amt{font-size:18px;font-weight:bold;color:#2d7baa;text-shadow:none}
+.fusion-main{display:flex;flex-direction:column;gap:18px}
+.fusion-chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.fusion-chart-grid .chart-tech-card.full{grid-column:1/-1}
+#sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+#sgrid .scard{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(229,245,255,.84));border:1px solid rgba(80,194,255,.22);border-radius:18px;padding:16px;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;box-shadow:inset 0 0 14px rgba(46,183,255,.03),0 12px 26px rgba(25,102,156,.06)}
+#sgrid .scard::before{content:'';position:absolute;inset:auto 0 0 0;height:2px;background:linear-gradient(90deg,transparent,rgba(86,226,255,.9),transparent)}
+#sgrid .scard:hover{transform:translateY(-2px);border-color:rgba(108,227,255,.42);box-shadow:0 0 0 1px rgba(86,226,255,.08),0 0 26px rgba(34,180,255,.12),inset 0 0 24px rgba(35,171,255,.06)}
+#sgrid .sch{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+#sgrid .scbay{font-size:18px;font-weight:bold;color:#123f62;letter-spacing:.8px;text-shadow:none}
+#sgrid .scocc{font-size:10px;padding:5px 8px;border-radius:999px;background:rgba(42,200,255,.12);color:#2773a3;border:1px solid rgba(83,216,255,.18);text-shadow:none}
+#sgrid .sr{display:flex;justify-content:space-between;padding:8px 0;font-size:13px;border-bottom:1px solid rgba(75,159,214,.12)}
+#sgrid .sr:last-child{border-bottom:none;padding-top:10px;font-weight:bold}
+#sgrid .sr .sl{color:#4f7391;text-shadow:none}
+#sgrid .sr .sv{color:#123f62;text-shadow:none}
+#sgrid .sr:last-child .sv{color:#2d7baa;font-size:16px}
+@media(max-width:1100px){.fusion-board{grid-template-columns:1fr}.fusion-chart-grid{grid-template-columns:1fr}}
+@media(max-width:980px){.monthly-board-grid,.monthly-chart-grid{grid-template-columns:1fr}.monthly-hero-top{flex-direction:column}.monthly-control-card{width:100%}.monthly-title{font-size:34px}}
 .mov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .mov.sh{display:flex}
 .mdl{background:var(--bg3);border:1px solid var(--ac);border-radius:8px;padding:26px;width:460px;max-width:92vw;box-shadow:0 0 40px var(--ac15);animation:mi .2s ease}
@@ -528,38 +640,133 @@ document.ontouchend = function() {
     <div class="es" id="es-sch"><div class="em">🔍</div><div>在上方搜索框输入集装箱号码 / Enter Container No. above</div></div>
   </div>
   <div class="tc" id="tc-monthly">
-    <div class="msel">
-      <label style="color:var(--tx2);font-size:10px;letter-spacing:1px">月份 Month：</label>
-      <select id="msel" onchange="renderMS()"></select>
-      <button class="btn btn-g" onclick="exportCSV()">📤 导出 Export</button>
-      <button class="btn btn-d clear-btn" onclick="openClearModal()">🗑 清空 Clear</button>
-    </div>
-    <div class="mtot">
-      <div class="mti"><div class="mil">停靠次数 Stays</div><div class="miv g" id="mc-c">0</div></div>
-      <div class="mti"><div class="mil">总收入 AED Revenue</div><div class="miv" id="mc-r">0</div></div>
-      <div class="mti"><div class="mil">总停靠天数 Total Days</div><div class="miv g" id="mc-d">0</div></div>
-    </div>
-    <div class="sgrid" id="sgrid"></div>
-    <div id="chartArea" style="margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:24px">
-      <div style="background:#fff;border:1px solid var(--bd);border-radius:8px;padding:20px">
-        <div style="font-size:14px;font-weight:bold;margin-bottom:12px;color:var(--tx)">📊 停车位 80/81/83/84/85 每日收入 Bar Chart (AED)</div>
-        <canvas id="barChart"></canvas>
+    <div class="monthly-shell">
+      <div class="monthly-hero">
+        <div class="monthly-hero-top">
+          <div>
+            <div class="monthly-kicker">Monthly Intelligence</div>
+            <div class="monthly-title">月度统计指挥舱</div>
+            <div class="monthly-sub">基于现有出场数据汇总月度停靠、收入和车位活跃度，并加入当前已停/未停车位状态，形成更直观的科技感运营视图。</div>
+            <div class="monthly-chip-row">
+              <span class="monthly-chip">Realtime Snapshot</span>
+              <span class="monthly-chip">Monthly Revenue Map</span>
+              <span class="monthly-chip">Occupied vs Available</span>
+            </div>
+          </div>
+          <div class="monthly-control-card">
+            <div class="cap">月份 Month</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <select id="msel" onchange="renderMS()" style="flex:1;min-width:120px"></select>
+              <button class="btn btn-g" onclick="exportCSV()">📤 导出</button>
+              <button class="btn btn-d clear-btn" onclick="openClearModal()">🗑 清空</button>
+            </div>
+            <div class="val" id="monthly-selected-label" style="margin-top:10px">--</div>
+          </div>
+        </div>
+
+        <div class="monthly-metrics">
+          <div class="monthly-metric"><div class="lab">Stays</div><div class="num" id="mc-c">0</div><div class="sub">本月完成停靠次数</div></div>
+          <div class="monthly-metric"><div class="lab">Revenue</div><div class="num" id="mc-r">0</div><div class="sub">本月出场收入 AED</div></div>
+          <div class="monthly-metric"><div class="lab">Total Days</div><div class="num" id="mc-d">0</div><div class="sub">累计停靠天数</div></div>
+          <div class="monthly-metric"><div class="lab">Used Bays</div><div class="num" id="mc-used-bays">0</div><div class="sub">本月发生过停靠的车位</div></div>
+          <div class="monthly-metric"><div class="lab">Occupied Now</div><div class="num" id="mc-occ-now">0</div><div class="sub">当前仍在场的车位</div></div>
+          <div class="monthly-metric"><div class="lab">Available Now</div><div class="num" id="mc-free-now">0</div><div class="sub">当前可继续停放的车位</div></div>
+        </div>
       </div>
-      <div style="background:#fff;border:1px solid var(--bd);border-radius:8px;padding:20px">
-        <div style="font-size:14px;font-weight:bold;margin-bottom:12px;color:var(--tx)">📈 其他停车位月度收入 Line Chart (AED)</div>
-        <canvas id="lineChart"></canvas>
-      </div>
-      <div style="background:#fff;border:1px solid var(--bd);border-radius:8px;padding:20px">
-        <div style="font-size:14px;font-weight:bold;margin-bottom:12px;color:var(--tx)">🥧 所有停车位每日收入占比</div>
-        <canvas id="pieDaily"></canvas>
-      </div>
-      <div style="background:#fff;border:1px solid var(--bd);border-radius:8px;padding:20px">
-        <div style="font-size:14px;font-weight:bold;margin-bottom:12px;color:var(--tx)">🥧 所有停车位每月收入占比</div>
-        <canvas id="pieMonthly"></canvas>
-      </div>
-      <div style="background:#fff;border:1px solid var(--bd);border-radius:8px;padding:20px;grid-column:1/-1">
-        <div style="font-size:14px;font-weight:bold;margin-bottom:12px;color:var(--tx)">📊📈 混合图 — 80/81/83/84/85 每日收入折线 + 各停车位每月收入柱状</div>
-        <canvas id="mixedChart" height="100"></canvas>
+
+      <div class="fusion-board">
+        <div class="fusion-side">
+          <div class="fusion-panel">
+            <h3>AI Signals</h3>
+            <div class="signal-stack">
+              <div class="signal-card">
+                <div class="lab">Top Revenue Bay</div>
+                <div class="val" id="monthly-signal-top-bay">--</div>
+                <div class="sub" id="monthly-signal-top-bay-sub">等待月度数据</div>
+              </div>
+              <div class="signal-card">
+                <div class="lab">Longest Stay Bay</div>
+                <div class="val" id="monthly-signal-long-bay">--</div>
+                <div class="sub" id="monthly-signal-long-bay-sub">等待月度数据</div>
+              </div>
+              <div class="signal-card">
+                <div class="lab">Live Occupancy</div>
+                <div class="val" id="monthly-signal-occ-rate">0%</div>
+                <div class="sub" id="monthly-signal-occ-rate-sub">当前车位占用率</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="fusion-panel">
+            <h3>Bay Utilization Summary</h3>
+            <div class="bay-mini-list">
+              <div class="bay-mini-panel">
+                <h4>Month Active Bays</h4>
+                <div class="big" id="monthly-active-bays">0</div>
+                <div class="desc">本月有完成停靠记录的车位数</div>
+                <div class="bay-mini-tags" id="monthly-active-tags"></div>
+              </div>
+              <div class="bay-mini-panel">
+                <h4>Month Idle Bays</h4>
+                <div class="big" id="monthly-idle-bays">0</div>
+                <div class="desc">本月没有出场记录的车位数</div>
+                <div class="bay-mini-tags" id="monthly-idle-tags"></div>
+              </div>
+              <div class="bay-mini-panel">
+                <h4>Occupied Now</h4>
+                <div class="big" id="monthly-occupied-bays">0</div>
+                <div class="desc">当前已停集装箱位</div>
+                <div class="bay-mini-tags" id="monthly-occupied-tags"></div>
+              </div>
+              <div class="bay-mini-panel">
+                <h4>Available Now</h4>
+                <div class="big" id="monthly-available-bays">0</div>
+                <div class="desc">当前未停集装箱位</div>
+                <div class="bay-mini-tags" id="monthly-available-tags"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="fusion-panel">
+            <h3>Revenue Leaderboard</h3>
+            <div class="leader-list" id="monthly-revenue-leaders"></div>
+          </div>
+        </div>
+
+        <div class="fusion-main">
+          <div class="monthly-board">
+            <div class="monthly-board-title">
+              <h3>Current Bay Status</h3>
+              <span>实时停放快照</span>
+            </div>
+            <div class="bay-neon-grid" id="monthly-bay-live"></div>
+          </div>
+
+          <div class="sgrid" id="sgrid"></div>
+
+          <div id="chartArea" class="fusion-chart-grid">
+            <div class="chart-tech-card">
+              <div class="chart-tech-title">Daily Revenue Matrix · Bay 80/81/83/84/85</div>
+              <canvas id="barChart"></canvas>
+            </div>
+            <div class="chart-tech-card">
+              <div class="chart-tech-title">Other Bays · Monthly Revenue Trend</div>
+              <canvas id="lineChart"></canvas>
+            </div>
+            <div class="chart-tech-card">
+              <div class="chart-tech-title">Daily Revenue Share · All Bays</div>
+              <canvas id="pieDaily"></canvas>
+            </div>
+            <div class="chart-tech-card">
+              <div class="chart-tech-title">Monthly Revenue Share · All Bays</div>
+              <canvas id="pieMonthly"></canvas>
+            </div>
+            <div class="chart-tech-card full">
+              <div class="chart-tech-title">Hybrid Revenue Grid · Daily Standard Bays + Monthly All Bays</div>
+              <canvas id="mixedChart" height="100"></canvas>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -623,6 +830,6 @@ document.ontouchend = function() {
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><script src="app.js?v=25"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><script src="app.js?v=26"></script>
 </body>
 </html>
