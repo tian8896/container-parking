@@ -1583,19 +1583,29 @@ function acProductSearch(val) {
   var box = document.getElementById('ac-product');
   var q = (val || '').trim().toUpperCase();
   productAcIdx = -1;
-  if (!q) { if (box) box.style.display = 'none'; return; }
-  var filtered = products.filter(function(p) { return p.toUpperCase().indexOf(q) >= 0 && selectedProducts.indexOf(p) === -1; }).slice(0, 8);
-  if (box) {
-    var h = '';
-    if (filtered.length > 0) {
-      h = filtered.map(function(p) {
-        return '<div class="autocomplete-item" onclick="addProductTag(\'' + p.replace(/'/g, "\\'") + '\')">+ ' + p + '</div>';
-      }).join('');
-    }
-    h += '<div class="autocomplete-item" style="color:var(--ac);border-top:1px solid var(--bd)" onclick="addProductTag(\'' + val.trim().replace(/'/g, "\\'") + '\')">+ 添加 "' + val.trim() + '"</div>';
-    box.innerHTML = h;
+  if (!box) return;
+
+  var available = products.filter(function(p) { return selectedProducts.indexOf(p) === -1; });
+  var filtered = available.filter(function(p) {
+    return !q || p.toUpperCase().indexOf(q) >= 0;
+  }).slice(0, 8);
+
+  if (products.length === 0) {
+    box.innerHTML = '<div class="autocomplete-item" style="color:var(--tx2);cursor:default">请先到设置 > 品名维护 / Add products in Settings first</div>';
     box.style.display = 'block';
+    return;
   }
+
+  if (filtered.length === 0) {
+    box.innerHTML = '<div class="autocomplete-item" style="color:var(--tx2);cursor:default">未找到品名，请到设置页添加 / No product found</div>';
+    box.style.display = 'block';
+    return;
+  }
+
+  box.innerHTML = filtered.map(function(p) {
+    return '<div class="autocomplete-item" onclick="addProductTag(\'' + p.replace(/'/g, "\\'") + '\')">+ ' + p + '</div>';
+  }).join('');
+  box.style.display = 'block';
 }
 
 function acProductNav(evt) {
@@ -1610,15 +1620,15 @@ function acProductNav(evt) {
 }
 
 function addProductTag(name) {
-  name = titleCase(name);
+  name = (name || '').trim();
   if (!name) return;
-  if (selectedProducts.indexOf(name) === -1) {
-    selectedProducts.push(name);
-    if (products.indexOf(name) === -1) {
-      products.push(name);
-      saveProducts(products);
-      toast('品名 "' + name + '" 已添加', 'ok');
-    }
+  var productName = products.find(function(p) { return p.toUpperCase() === name.toUpperCase(); });
+  if (!productName) {
+    toast('请先在设置页面维护品名: ' + name, 'err');
+    return;
+  }
+  if (selectedProducts.indexOf(productName) === -1) {
+    selectedProducts.push(productName);
   }
   gid('f-product').value = '';
   renderProductTags();

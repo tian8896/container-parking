@@ -595,7 +595,7 @@ document.ontouchend = function() {
     </div>
     <div class="fg"><label>品名 Product Name <span style="color:var(--rd)">*</span></label>
       <div class="autocomplete">
-        <input type="text" id="f-product" placeholder="输入搜索或添加新品名..." autocomplete="off" oninput="acProductSearch(this.value)" onblur="setTimeout(()=>hideAc('ac-product'),200)" onkeydown="acProductNav(event)">
+        <input type="text" id="f-product" placeholder="搜索设置中的品名并从下拉添加..." autocomplete="off" onfocus="acProductSearch(this.value)" oninput="acProductSearch(this.value)" onblur="setTimeout(()=>hideAc('ac-product'),200)" onkeydown="acProductNav(event)">
         <div class="autocomplete-list" id="ac-product"></div>
       </div>
       <div id="product-tags" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px"></div>
