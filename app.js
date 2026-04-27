@@ -89,6 +89,10 @@ var products = [];
 var selectedProducts = [];
 var cTab = 'records';
 var sTimer = null;
+var pageState = {
+  all: { page: 1, size: 100 },
+  act: { page: 1, size: 100 }
+};
 var dbRef = null;
 var db = null;
 var settingsRef = null;
@@ -586,15 +590,15 @@ function renderBaySettingsForm() {
   
   if (hintEl) {
     hintEl.innerHTML = isAdm
-      ? '<div style="padding:8px 12px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:5px;color:#0066cc;font-size:12px;margin-bottom:12px">👤 管理员可增删停车位</div>'
-      : '<div style="padding:8px 12px;background:#fff3cd;border:1px solid #ffc107;border-radius:5px;color:#856404;font-size:12px;margin-bottom:12px">⚠️ 只有管理员可以修改停车位设置</div>';
+      ? '<div style="padding:8px 12px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:5px;color:#0066cc;font-size:12px;margin-bottom:12px">👤 管理员可增删停车位 / Admin can add or remove bays</div>'
+      : '<div style="padding:8px 12px;background:#fff3cd;border:1px solid #ffc107;border-radius:5px;color:#856404;font-size:12px;margin-bottom:12px">⚠️ 只有管理员可以修改停车位设置 / Only admin can edit bay settings</div>';
   }
   
   var dis = isAdm ? '' : ' disabled';
   
   form.innerHTML = tempBays.map(function(bay, idx) {
     var dBtn = isAdm ? '<button type="button" class="bay-del-btn" onclick="removeBayRow(' + idx + ')">X</button>' : '';
-    return '<div class="bay-setting-item"><label>车位 ' + (idx + 1) + '</label><input type="number" id="bay-inp-' + idx + '" value="' + bay + '" min="1" max="9999" placeholder="输入车位号"' + dis + '>' + dBtn + '</div>';
+    return '<div class="bay-setting-item"><label>车位 Bay ' + (idx + 1) + '</label><input type="number" id="bay-inp-' + idx + '" value="' + bay + '" min="1" max="9999" placeholder="输入车位号 / Bay no."' + dis + '>' + dBtn + '</div>';
   }).join('');
 }
 
@@ -671,8 +675,8 @@ function renderAccList() {
   // 权限提示
   if (hintEl) {
     hintEl.innerHTML = isAdm
-      ? '<div style="padding:8px 12px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:5px;color:#0066cc;font-size:12px;margin-bottom:12px">👤 管理员可以添加和管理用户账号</div>'
-      : '<div style="padding:8px 12px;background:#fff3cd;border:1px solid #ffc107;border-radius:5px;color:#856404;font-size:12px;margin-bottom:12px">⚠️ 只有管理员可以管理账号</div>';
+      ? '<div style="padding:8px 12px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:5px;color:#0066cc;font-size:12px;margin-bottom:12px">👤 管理员可以添加和管理用户账号 / Admin can add and manage user accounts</div>'
+      : '<div style="padding:8px 12px;background:#fff3cd;border:1px solid #ffc107;border-radius:5px;color:#856404;font-size:12px;margin-bottom:12px">⚠️ 只有管理员可以管理账号 / Only admin can manage accounts</div>';
   }
   
   // 统计信息
@@ -689,30 +693,30 @@ function renderAccList() {
   // 头部信息栏 - 与停车位设置一致
   h += '<div class="settings-header">';
   h += '<div class="settings-stats">';
-  h += '<div class="stat-item"><span class="stat-value">' + totalUsers + '</span><span class="stat-label">用户总数</span></div>';
-  h += '<div class="stat-item"><span class="stat-value">' + adminCount + '</span><span class="stat-label">管理员</span></div>';
-  h += '<div class="stat-item"><span class="stat-value">' + staffCount + '</span><span class="stat-label">普通员工</span></div>';
-  h += '<div class="stat-item"><span class="stat-value">' + (isAdm ? '管理员' : '普通员工') + '</span><span class="stat-label">当前权限</span></div>';
+  h += '<div class="stat-item"><span class="stat-value">' + totalUsers + '</span><span class="stat-label">用户总数 Users</span></div>';
+  h += '<div class="stat-item"><span class="stat-value">' + adminCount + '</span><span class="stat-label">管理员 Admin</span></div>';
+  h += '<div class="stat-item"><span class="stat-value">' + staffCount + '</span><span class="stat-label">普通员工 Staff</span></div>';
+  h += '<div class="stat-item"><span class="stat-value">' + (isAdm ? '管理员 Admin' : '普通员工 Staff') + '</span><span class="stat-label">当前权限 Role</span></div>';
   h += '</div>';
   
   // 刷新按钮
-  h += '<button onclick="refreshUsersList()" style="padding:8px 16px;background:#f5f5f5;border:1px solid #ddd;border-radius:6px;font-size:13px;cursor:pointer;margin-left:auto">刷新列表</button>';
+  h += '<button onclick="refreshUsersList()" style="padding:8px 16px;background:#f5f5f5;border:1px solid #ddd;border-radius:6px;font-size:13px;cursor:pointer;margin-left:auto">刷新列表 Refresh</button>';
   h += '</div>';
   
   // 只有管理员可以添加账号
   if (isAdm) {
-    h += '<button class="settings-add-btn" onclick="showAccForm(null)"><span class="btn-icon">+</span><span class="btn-text">添加新账号</span></button>';
+    h += '<button class="settings-add-btn" onclick="showAccForm(null)"><span class="btn-icon">+</span><span class="btn-text">添加新账号 Add Account</span></button>';
   } else {
-    h += '<div class="settings-hint warning"><span class="hint-icon">⚠️</span><span class="hint-text">只有管理员可以管理账号</span></div>';
+    h += '<div class="settings-hint warning"><span class="hint-icon">⚠️</span><span class="hint-text">只有管理员可以管理账号 / Only admin can manage accounts</span></div>';
   }
   h += '</div>';
   
   // 权限说明
-  h += '<div class="settings-hint info" style="margin-bottom:16px"><span class="hint-icon">💡</span><span class="hint-text"><b>权限说明：</b>管理员可管理停车位、计费设置和账号；普通员工可管理供应商和品名。</span></div>';
+  h += '<div class="settings-hint info" style="margin-bottom:16px"><span class="hint-icon">💡</span><span class="hint-text"><b>权限说明 Permissions:</b> 管理员可管理停车位、计费设置和账号；普通员工可管理供应商和品名。Admin manages bays, fees, and accounts; staff manages suppliers and products.</span></div>';
   
   // 账号表单区域（动态显示）
   h += '<div id="acc-form-box" style="display:none;margin-bottom:16px" class="acc-form-box">';
-  h += '<div class="acc-form-title" id="acc-form-title">添加账号</div>';
+  h += '<div class="acc-form-title" id="acc-form-title">添加账号 Add Account</div>';
   h += '<div class="fg"><label>邮箱 Email</label><input type="email" id="acc-username" placeholder="输入邮箱..."></div>';
   h += '<div class="fg"><label>密码 Password</label><input type="password" id="acc-password" placeholder="输入密码（至少6位）..."></div>';
   h += '<div class="fg"><label>确认密码 Confirm Password</label><input type="password" id="acc-password2" placeholder="再次输入密码..."></div>';
@@ -1072,8 +1076,8 @@ function loadFeePanel() {
   // 权限提示
   if (hintEl) {
     hintEl.innerHTML = isAdm
-      ? '<div style="padding:8px 12px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:5px;color:#0066cc;font-size:12px;margin-bottom:12px">👤 管理员可以修改计费设置</div>'
-      : '<div style="padding:8px 12px;background:#fff3cd;border:1px solid #ffc107;border-radius:5px;color:#856404;font-size:12px;margin-bottom:12px">⚠️ 只有管理员可以修改计费设置</div>';
+      ? '<div style="padding:8px 12px;background:#e8f0fe;border:1px solid #c5d8f8;border-radius:5px;color:#0066cc;font-size:12px;margin-bottom:12px">👤 管理员可以修改计费设置 / Admin can edit fee settings</div>'
+      : '<div style="padding:8px 12px;background:#fff3cd;border:1px solid #ffc107;border-radius:5px;color:#856404;font-size:12px;margin-bottom:12px">⚠️ 只有管理员可以修改计费设置 / Only admin can edit fee settings</div>';
   }
   
   var h = '';
@@ -1081,8 +1085,8 @@ function loadFeePanel() {
   // 头部信息栏
   h += '<div class="settings-header">';
   h += '<div class="settings-stats">';
-  h += '<div class="stat-item"><span class="stat-value">' + BAYS.length + '</span><span class="stat-label">停车位总数</span></div>';
-  h += '<div class="stat-item"><span class="stat-value">' + DEFAULT_RATE + '</span><span class="stat-label">默认单价 (AED/天)</span></div>';
+  h += '<div class="stat-item"><span class="stat-value">' + BAYS.length + '</span><span class="stat-label">停车位总数 Bays</span></div>';
+  h += '<div class="stat-item"><span class="stat-value">' + DEFAULT_RATE + '</span><span class="stat-label">默认单价 Default (AED/Day)</span></div>';
   h += '</div>';
   h += '</div>';
   
@@ -1095,19 +1099,19 @@ function loadFeePanel() {
     h += '<div class="settings-item">';
     h += '<div class="item-icon" style="background:#fff7e6;border-color:#ffd591">🅿️</div>';
     h += '<div class="item-content">';
-    h += '<div class="item-title">停车位 #' + bayId + '</div>';
-    h += '<div class="item-meta"><span class="usage-badge">当前费率: ' + rate + ' AED/天</span></div>';
+    h += '<div class="item-title">停车位 Bay #' + bayId + '</div>';
+    h += '<div class="item-meta"><span class="usage-badge">当前费率 Current: ' + rate + ' AED/天 Day</span></div>';
     h += '</div>';
     h += '<div class="item-actions" style="display:flex;align-items:center;gap:10px">';
     h += '<input type="number" id="rate-' + bayId + '" value="' + rate + '"' + dis + ' min="1" max="99999" placeholder="' + DEFAULT_RATE + '" style="width:100px;padding:8px 12px;border:2px solid #ffd54f;border-radius:6px;font-size:16px;font-weight:bold;text-align:center;outline:none">';
-    h += '<span style="font-size:13px;color:#666;font-weight:bold;white-space:nowrap">AED/天</span>';
+    h += '<span style="font-size:13px;color:#666;font-weight:bold;white-space:nowrap">AED/天 Day</span>';
     h += '</div>';
     h += '</div>';
   });
   h += '</div>';
   
   // 提示信息
-  h += '<div class="settings-hint info" style="margin-top:16px"><span class="hint-icon">💡</span><span class="hint-text">计费规则：23:00前入场算第1天到午夜，23:00后入场从次日开始计算。不足1天按1天收费。</span></div>';
+  h += '<div class="settings-hint info" style="margin-top:16px"><span class="hint-icon">💡</span><span class="hint-text">计费规则 Billing: 23:00前入场算第1天到午夜，23:00后入场从次日开始计算。不足1天按1天收费。Before 23:00 counts day 1 until midnight; after 23:00 starts next day; partial days count as 1 day.</span></div>';
   
   el.innerHTML = h;
 }
@@ -1657,24 +1661,24 @@ function renderSupList() {
   // 头部信息栏 - 与停车位设置一致
   h += '<div class="settings-header">';
   h += '<div class="settings-stats">';
-  h += '<div class="stat-item"><span class="stat-value">' + suppliers.length + '</span><span class="stat-label">供应商总数</span></div>';
+  h += '<div class="stat-item"><span class="stat-value">' + suppliers.length + '</span><span class="stat-label">供应商总数 Suppliers</span></div>';
   h += '</div>';
   
   // 添加按钮（管理员和普通员工都可以）
   if (canManage) {
-    h += '<button class="settings-add-btn" onclick="showAddSupplierForm()"><span class="btn-icon">+</span><span class="btn-text">添加供应商</span></button>';
+    h += '<button class="settings-add-btn" onclick="showAddSupplierForm()"><span class="btn-icon">+</span><span class="btn-text">添加供应商 Add Supplier</span></button>';
   } else {
-    h += '<div class="settings-hint warning"><span class="hint-icon">⚠️</span><span class="hint-text">无权限管理供应商</span></div>';
+    h += '<div class="settings-hint warning"><span class="hint-icon">⚠️</span><span class="hint-text">无权限管理供应商 / No permission to manage suppliers</span></div>';
   }
   h += '</div>';
   
   // 添加表单区域（动态显示）
   h += '<div id="sup-add-form" style="display:none;margin-bottom:16px" class="acc-form-box">';
-  h += '<div class="acc-form-title">添加供应商</div>';
+  h += '<div class="acc-form-title">添加供应商 Add Supplier</div>';
   h += '<div style="display:flex;gap:10px;align-items:center">';
-  h += '<input type="text" id="sup-new-input" placeholder="输入供应商名称..." style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px" onkeypress="if(event.key===\'Enter\')addSupplierFromSettings()">';
-  h += '<button class="btn btn-s" style="padding:10px 16px" onclick="addSupplierFromSettings()">保存</button>';
-  h += '<button class="btn btn-g" style="padding:10px 16px" onclick="hideAddSupplierForm()">取消</button>';
+  h += '<input type="text" id="sup-new-input" placeholder="输入供应商名称 / Supplier name..." style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px" onkeypress="if(event.key===\'Enter\')addSupplierFromSettings()">';
+  h += '<button class="btn btn-s" style="padding:10px 16px" onclick="addSupplierFromSettings()">保存 Save</button>';
+  h += '<button class="btn btn-g" style="padding:10px 16px" onclick="hideAddSupplierForm()">取消 Cancel</button>';
   h += '</div>';
   h += '</div>';
   
@@ -1685,7 +1689,7 @@ function renderSupList() {
   
   // 供应商列表
   if (suppliers.length === 0) {
-    h += '<div class="settings-empty"><span class="empty-icon">🏢</span><span class="empty-text">暂无供应商</span><span class="empty-sub">点击上方"+ 添加供应商"按钮添加</span></div>';
+    h += '<div class="settings-empty"><span class="empty-icon">🏢</span><span class="empty-text">暂无供应商 / No Suppliers</span><span class="empty-sub">点击上方按钮添加 / Use the add button above</span></div>';
   } else {
     h += '<div class="settings-list">';
     suppliers.forEach(function(name, idx) {
@@ -1702,7 +1706,7 @@ function renderSupList() {
       h += '<div class="item-icon supplier">🏢</div>';
       h += '<div class="item-content">';
       h += '<div class="item-title">' + name + '</div>';
-      h += '<div class="item-meta"><span class="usage-badge">使用 ' + usageCount + ' 次</span></div>';
+      h += '<div class="item-meta"><span class="usage-badge">使用 Used ' + usageCount + ' 次</span></div>';
       h += '</div>';
       h += '<div class="item-actions">' + actions + '</div>';
       h += '</div>';
@@ -1780,24 +1784,24 @@ function renderProdList() {
   // 头部信息栏 - 与停车位设置一致
   h += '<div class="settings-header">';
   h += '<div class="settings-stats">';
-  h += '<div class="stat-item"><span class="stat-value">' + products.length + '</span><span class="stat-label">品名总数</span></div>';
+  h += '<div class="stat-item"><span class="stat-value">' + products.length + '</span><span class="stat-label">品名总数 Products</span></div>';
   h += '</div>';
   
   // 添加按钮（管理员和普通员工都可以）
   if (canManage) {
-    h += '<button class="settings-add-btn" onclick="showAddProductForm()"><span class="btn-icon">+</span><span class="btn-text">添加品名</span></button>';
+    h += '<button class="settings-add-btn" onclick="showAddProductForm()"><span class="btn-icon">+</span><span class="btn-text">添加品名 Add Product</span></button>';
   } else {
-    h += '<div class="settings-hint warning"><span class="hint-icon">⚠️</span><span class="hint-text">无权限管理品名</span></div>';
+    h += '<div class="settings-hint warning"><span class="hint-icon">⚠️</span><span class="hint-text">无权限管理品名 / No permission to manage products</span></div>';
   }
   h += '</div>';
   
   // 添加表单区域（动态显示）
   h += '<div id="prod-add-form" style="display:none;margin-bottom:16px" class="acc-form-box">';
-  h += '<div class="acc-form-title">添加品名</div>';
+  h += '<div class="acc-form-title">添加品名 Add Product</div>';
   h += '<div style="display:flex;gap:10px;align-items:center">';
-  h += '<input type="text" id="prod-new-input" placeholder="输入品名..." style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px" onkeypress="if(event.key===\'Enter\')addProductFromSettings()">';
-  h += '<button class="btn btn-s" style="padding:10px 16px" onclick="addProductFromSettings()">保存</button>';
-  h += '<button class="btn btn-g" style="padding:10px 16px" onclick="hideAddProductForm()">取消</button>';
+  h += '<input type="text" id="prod-new-input" placeholder="输入品名 / Product name..." style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px" onkeypress="if(event.key===\'Enter\')addProductFromSettings()">';
+  h += '<button class="btn btn-s" style="padding:10px 16px" onclick="addProductFromSettings()">保存 Save</button>';
+  h += '<button class="btn btn-g" style="padding:10px 16px" onclick="hideAddProductForm()">取消 Cancel</button>';
   h += '</div>';
   h += '</div>';
   
@@ -1808,7 +1812,7 @@ function renderProdList() {
   
   // 品名列表
   if (products.length === 0) {
-    h += '<div class="settings-empty"><span class="empty-icon">📦</span><span class="empty-text">暂无品名</span><span class="empty-sub">点击上方"+ 添加品名"按钮添加</span></div>';
+    h += '<div class="settings-empty"><span class="empty-icon">📦</span><span class="empty-text">暂无品名 / No Products</span><span class="empty-sub">点击上方按钮添加 / Use the add button above</span></div>';
   } else {
     h += '<div class="settings-list">';
     products.forEach(function(name, idx) {
@@ -1827,7 +1831,7 @@ function renderProdList() {
       h += '<div class="item-icon product">📦</div>';
       h += '<div class="item-content">';
       h += '<div class="item-title">' + name + '</div>';
-      h += '<div class="item-meta"><span class="usage-badge">使用 ' + usageCount + ' 次</span></div>';
+      h += '<div class="item-meta"><span class="usage-badge">使用 Used ' + usageCount + ' 次</span></div>';
       h += '</div>';
       h += '<div class="item-actions">' + actions + '</div>';
       h += '</div>';
@@ -2020,6 +2024,8 @@ function swTab(tab) {
   if (at) at.classList.add('ac');
   var tc = gid('tc-' + tab);
   if (tc) tc.classList.add('ac');
+  if (tab === 'records') renderAllRecs();
+  if (tab === 'active') renderActRecs();
   if (tab === 'sres') renderSRes();
 }
 
@@ -2061,6 +2067,62 @@ function mkRow(r, showDel, forceDel) {
   return '<tr><td><strong style="font-size:16px">' + r.cn + '</strong></td><td>' + supCell + '</td><td style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + (r.products || []).join(', ') + '">' + prodCell + '</td><td><span style="color:var(--am);font-size:21px;font-weight:bold;font-family:Arial,sans-serif">#' + r.bay + '</span></td><td>' + fdt(r.arr) + '</td><td>' + fdt(r.dep) + '</td><td>' + dur.t + '</td><td><span class="ftag">' + fee + ' AED</span></td><td>' + bad + '</td><td><button class="abtn" onclick="showDet(\'' + r.id + '\')">Details</button>' + (!r.dep ? '<button class="abtn" onclick="qoOut(\'' + r.cn + '\')">Out</button>' + editBtn : '') + del + '</td></tr>';
 }
 
+function getPagedRows(key, rows) {
+  var st = pageState[key] || { page: 1, size: 100 };
+  var totalPages = Math.max(1, Math.ceil(rows.length / st.size));
+  if (st.page > totalPages) st.page = totalPages;
+  if (st.page < 1) st.page = 1;
+  var start = (st.page - 1) * st.size;
+  return {
+    rows: rows.slice(start, start + st.size),
+    start: rows.length ? start + 1 : 0,
+    end: Math.min(start + st.size, rows.length),
+    total: rows.length,
+    totalPages: totalPages,
+    page: st.page,
+    size: st.size
+  };
+}
+
+function renderPager(key, info) {
+  var el = gid(key === 'all' ? 'pg-all' : 'pg-act');
+  if (!el) return;
+  if (!info || info.total === 0) {
+    el.style.display = 'none';
+    el.innerHTML = '';
+    return;
+  }
+
+  el.style.display = 'flex';
+  var pageBtns = '';
+  var startPage = Math.max(1, info.page - 2);
+  var endPage = Math.min(info.totalPages, info.page + 2);
+  if (endPage - startPage < 4) {
+    startPage = Math.max(1, endPage - 4);
+    endPage = Math.min(info.totalPages, startPage + 4);
+  }
+  for (var i = startPage; i <= endPage; i++) {
+    pageBtns += '<button class="pgbtn ' + (i === info.page ? 'ac' : '') + '" onclick="setPage(\'' + key + '\',' + i + ')">' + i + '</button>';
+  }
+
+  el.innerHTML = '<div class="pager-left"><span>显示 ' + info.start + '-' + info.end + ' / 共 ' + info.total + ' 条</span><label>每页行数 <select onchange="setPageSize(\'' + key + '\',this.value)"><option value="50"' + (info.size === 50 ? ' selected' : '') + '>50</option><option value="100"' + (info.size === 100 ? ' selected' : '') + '>100</option><option value="200"' + (info.size === 200 ? ' selected' : '') + '>200</option><option value="500"' + (info.size === 500 ? ' selected' : '') + '>500</option></select></label></div><div class="pager-right"><button class="pgbtn" onclick="setPage(\'' + key + '\',' + (info.page - 1) + ')" ' + (info.page <= 1 ? 'disabled' : '') + '>Prev</button>' + pageBtns + '<button class="pgbtn" onclick="setPage(\'' + key + '\',' + (info.page + 1) + ')" ' + (info.page >= info.totalPages ? 'disabled' : '') + '>Next</button></div>';
+}
+
+function setPage(key, page) {
+  if (!pageState[key]) return;
+  pageState[key].page = parseInt(page, 10) || 1;
+  if (key === 'all') renderAllRecs();
+  if (key === 'act') renderActRecs();
+}
+
+function setPageSize(key, size) {
+  if (!pageState[key]) return;
+  pageState[key].size = parseInt(size, 10) || 100;
+  pageState[key].page = 1;
+  if (key === 'all') renderAllRecs();
+  if (key === 'act') renderActRecs();
+}
+
 function renderAllRecs() {
   var sorted = recs.slice().sort(function(a, b) { return new Date(b.arr) - new Date(a.arr); });
   var tb = gid('tb-all');
@@ -2070,11 +2132,14 @@ function renderAllRecs() {
   if (sorted.length === 0) {
     tb.innerHTML = '';
     es.style.display = 'block';
+    renderPager('all', null);
     return;
   }
   
   es.style.display = 'none';
-  tb.innerHTML = sorted.map(function(r) { return mkRow(r, true); }).join('');
+  var paged = getPagedRows('all', sorted);
+  tb.innerHTML = paged.rows.map(function(r) { return mkRow(r, true); }).join('');
+  renderPager('all', paged);
 }
 
 function renderActRecs() {
@@ -2086,11 +2151,13 @@ function renderActRecs() {
   if (act.length === 0) {
     tb.innerHTML = '';
     es.style.display = 'block';
+    renderPager('act', null);
     return;
   }
   
   es.style.display = 'none';
-  tb.innerHTML = act.map(function(r) {
+  var paged = getPagedRows('act', act);
+  tb.innerHTML = paged.rows.map(function(r) {
     var dur = nowDur(r.arr);
     var fee = nowFee(r.arr, r.bay);
     var editBtn = '<button class="abtn" onclick="editRec(\'' + r.id + '\')">Edit</button>';
@@ -2099,6 +2166,7 @@ function renderActRecs() {
     var prodCell = (r.products && r.products.length > 0) ? '<strong style="font-family:Arial,sans-serif">' + r.products.join(', ') + '</strong>' : '<span style="color:#ccc">-</span>';
     return '<tr><td><strong style="font-size:16px">' + r.cn + '</strong></td><td>' + supCell + '</td><td style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + (r.products || []).join(', ') + '">' + prodCell + '</td><td><span style="color:var(--am);font-size:21px;font-weight:bold;font-family:Arial,sans-serif">#' + r.bay + '</span></td><td>' + fdt(r.arr) + '</td><td>' + dur.t + '</td><td><span class="ftag">' + fee + ' AED</span></td><td><button class="abtn" onclick="showDet(\'' + r.id + '\')">Details</button><button class="abtn" onclick="qoOut(\'' + r.cn + '\')">Out</button>' + editBtn + delBtn + '</td></tr>';
   }).join('');
+  renderPager('act', paged);
 }
 
 function doSearch() {

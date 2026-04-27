@@ -70,6 +70,9 @@ th{background:var(--bg2);padding:12px 14px;text-align:left;font-size:14px;font-w
 td{padding:11px 14px;border-bottom:1px solid rgba(48,54,61,.5);color:var(--tx);white-space:nowrap;font-size:14px;font-weight:500}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(247,129,102,.03)}
+.compact-records th{padding-top:9px;padding-bottom:9px}
+.compact-records td{padding-top:6px;padding-bottom:6px;line-height:1.15}
+.compact-records .abtn{padding-top:5px;padding-bottom:5px}
 .bdg{display:inline-block;padding:5px 10px;border-radius:3px;font-size:13px;font-weight:bold;font-family:Arial,sans-serif}
 .bdg-a{background:var(--am15);color:var(--am);border:1px solid rgba(210,153,34,.3)}
 .bdg-d{background:var(--gr15);color:var(--gr);border:1px solid rgba(63,185,80,.3)}
@@ -77,6 +80,14 @@ tr:hover td{background:rgba(247,129,102,.03)}
 .abtn{padding:8px 16px;border:1px solid var(--bd);border-radius:4px;background:transparent;color:var(--tx);font-family:Arial,sans-serif;font-size:13px;font-weight:bold;cursor:pointer;margin-right:5px;transition:all .15s}
 .abtn:hover{border-color:var(--ac);color:var(--ac)}
 .abtn.x:hover{border-color:var(--rd);color:var(--rd)}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;background:var(--bg3);border:1px solid var(--bd);border-radius:6px;font-size:13px;color:var(--tx2)}
+.pager-left,.pager-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pager select{background:var(--bg4);border:1px solid var(--bd);border-radius:5px;padding:7px 10px;color:var(--tx);font-family:'Courier New',monospace;font-size:13px;outline:none}
+.pgbtn{min-width:34px;height:34px;padding:0 10px;border:1px solid var(--bd);border-radius:5px;background:#fff;color:var(--tx);font-family:Arial,sans-serif;font-size:13px;font-weight:bold;cursor:pointer;transition:all .15s}
+.pgbtn:hover{border-color:var(--ac);color:var(--ac)}
+.pgbtn.ac{background:var(--ac);border-color:var(--ac);color:#fff}
+.pgbtn:disabled{opacity:.45;cursor:not-allowed;border-color:var(--bd);color:var(--tx2);background:var(--bg4)}
+.pager:empty{display:none}
 .msel{display:flex;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
 .msel select,.msel input{background:var(--bg4);border:1px solid var(--bd);border-radius:5px;padding:9px 14px;color:var(--tx);font-family:'Courier New',monospace;font-size:14px;outline:none}
 .mtot{background:var(--bg3);border:1px solid var(--bd);border-radius:7px;padding:14px 22px;display:flex;gap:36px;margin-bottom:18px}
@@ -263,7 +274,7 @@ pointer-events:none}
 /* BAY SETTINGS MODAL */
 .bay-settings-modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:2000;backdrop-filter:blur(4px)}
 .bay-settings-modal.show{display:flex}
-.bay-settings-content{background:#fff;border-radius:12px;padding:30px;width:500px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.2);max-height:85vh;overflow-y:auto}
+.bay-settings-content{background:#fff;border-radius:12px;padding:34px;width:760px;max-width:94vw;box-shadow:0 8px 32px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto}
 .bay-settings-content h3{color:var(--ac);font-size:18px;margin-bottom:20px;letter-spacing:1px}
 .bay-setting-item{display:flex;gap:12px;margin-bottom:14px;align-items:center}
 .bay-setting-item label{width:80px;font-size:12px;color:var(--tx2);text-transform:uppercase}
@@ -281,8 +292,8 @@ pointer-events:none}
 .bay-add-btn:hover{background:#0052a3}
 .bay-setting-item input{flex:1;background:#f5f5f5;border:1px solid var(--bd);border-radius:6px;padding:8px 12px;color:var(--tx);font-size:14px;min-width:0}
 /* Settings tab bar */
-.set-tabs{display:flex;border-bottom:2px solid var(--bd);margin-bottom:18px;gap:4px}
-.set-tab{padding:9px 20px;font-size:13px;font-weight:bold;cursor:pointer;border-radius:6px 6px 0 0;color:var(--tx2);transition:all .2s;letter-spacing:.5px}
+.set-tabs{display:flex;border-bottom:2px solid var(--bd);margin-bottom:22px;gap:6px}
+.set-tab{padding:11px 18px;font-size:13px;font-weight:bold;cursor:pointer;border-radius:6px 6px 0 0;color:var(--tx2);transition:all .2s;letter-spacing:.5px;line-height:1.25}
 .set-tab:hover{color:var(--ac);background:#f0f5ff}
 .set-tab.active{color:var(--ac);background:#e8f0fe;border-bottom:2px solid var(--ac);margin-bottom:-2px}
 /* Account list */
@@ -474,11 +485,11 @@ document.ontouchend = function() {
 
     <!-- Tab bar -->
     <div class="set-tabs" style="flex-wrap:wrap">
-      <div class="set-tab active" id="stab-bay" onclick="switchSetTab('bay')">⚙️ 停车位</div>
-      <div class="set-tab" id="stab-sup" onclick="switchSetTab('sup')">🏢 供应商</div>
-      <div class="set-tab" id="stab-prod" onclick="switchSetTab('prod')">📦 品名</div>
-      <div class="set-tab" id="stab-acc" onclick="switchSetTab('acc')">👤 用户管理</div>
-      <div class="set-tab" id="stab-fee" onclick="switchSetTab('fee')">💰 计费设置</div>
+      <div class="set-tab active" id="stab-bay" onclick="switchSetTab('bay')">⚙️ 停车位 Bay</div>
+      <div class="set-tab" id="stab-sup" onclick="switchSetTab('sup')">🏢 供应商 Supplier</div>
+      <div class="set-tab" id="stab-prod" onclick="switchSetTab('prod')">📦 品名 Product</div>
+      <div class="set-tab" id="stab-acc" onclick="switchSetTab('acc')">👤 用户管理 Users</div>
+      <div class="set-tab" id="stab-fee" onclick="switchSetTab('fee')">💰 计费设置 Fees</div>
     </div>
 
     <!-- Bay settings panel -->
@@ -546,7 +557,7 @@ document.ontouchend = function() {
         <span id="currentUserDisplay">未登录</span>
         <span id="userRoleDisplay" style="font-size:11px;padding:2px 6px;background:#0066cc;color:#fff;border-radius:3px">-</span>
       </div>
-      <button class="btn btn-g" onclick="openBaySettings()" title="设置停车位">⚙️ 设置</button>
+      <button class="btn btn-g" onclick="openBaySettings()" title="设置 Settings">⚙️ 设置 Settings</button>
       <button class="btn btn-d" onclick="handleLogout()" title="退出登录">🚪 退出</button>
     </div>
   </div>
@@ -615,11 +626,13 @@ document.ontouchend = function() {
     <div class="tab" onclick="swTab('monthly')">📊 月度统计 Monthly</div>
   </div>
   <div class="tc ac" id="tc-records">
-    <div class="tw"><table><thead><tr><th>集装箱号 Container</th><th>供应商</th><th>品名</th><th>车位 Bay</th><th>入场时间 Arrival</th><th>出场时间 Departure</th><th>停靠时长 Duration</th><th>费用 Fee (AED)</th><th>状态 Status</th><th>操作 Action</th></tr></thead><tbody id="tb-all"></tbody></table></div>
+    <div class="tw compact-records"><table><thead><tr><th>集装箱号 Container</th><th>供应商</th><th>品名</th><th>车位 Bay</th><th>入场时间 Arrival</th><th>出场时间 Departure</th><th>停靠时长 Duration</th><th>费用 Fee (AED)</th><th>状态 Status</th><th>操作 Action</th></tr></thead><tbody id="tb-all"></tbody></table></div>
+    <div class="pager" id="pg-all"></div>
     <div class="es" id="es-all" style="display:none"><div class="em">📭</div><div>暂无记录 / No Records Yet<br>请先进行入场登记 / Please check in a container first</div></div>
   </div>
   <div class="tc" id="tc-active">
-    <div class="tw"><table><thead><tr><th>集装箱号 Container</th><th>供应商</th><th>品名</th><th>车位 Bay</th><th>入场时间 Arrival</th><th>已停时长 Duration</th><th>当前费用 Est. Fee (AED)</th><th>操作 Action</th></tr></thead><tbody id="tb-act"></tbody></table></div>
+    <div class="tw compact-records"><table><thead><tr><th>集装箱号 Container</th><th>供应商</th><th>品名</th><th>车位 Bay</th><th>入场时间 Arrival</th><th>已停时长 Duration</th><th>当前费用 Est. Fee (AED)</th><th>操作 Action</th></tr></thead><tbody id="tb-act"></tbody></table></div>
+    <div class="pager" id="pg-act"></div>
     <div class="es" id="es-act" style="display:none"><div class="em">✅</div><div>所有车位均已空闲 / All Bays Free</div></div>
   </div>
   <div class="tc" id="tc-sres">
