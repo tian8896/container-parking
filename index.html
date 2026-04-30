@@ -184,6 +184,9 @@ radial-gradient(circle at top right,rgba(0,149,255,.12),transparent 32%);
 pointer-events:none}
 .chart-tech-title{position:relative;font-size:13px;font-weight:bold;margin-bottom:14px;color:#123f62;letter-spacing:1.6px;text-transform:uppercase;text-shadow:none}
 .chart-tech-card canvas{position:relative;filter:drop-shadow(0 0 10px rgba(60,196,255,.08))}
+.chart-tech-card.pie-view{padding:14px 16px}
+.chart-tech-card.pie-view .chart-tech-title{margin-bottom:8px}
+.chart-tech-card.pie-view canvas{max-height:300px}
 .fusion-board{display:grid;grid-template-columns:330px 1fr;gap:20px;align-items:start}
 .fusion-side{display:flex;flex-direction:column;gap:18px}
 .fusion-panel{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(229,245,255,.82));border:1px solid rgba(79,196,255,.24);border-radius:22px;padding:18px;box-shadow:inset 0 0 18px rgba(41,174,255,.03),0 12px 26px rgba(25,102,156,.06)}
@@ -766,17 +769,17 @@ document.ontouchend = function() {
               <div class="chart-tech-title">Other Bays · Monthly Revenue Trend</div>
               <canvas id="lineChart"></canvas>
             </div>
-            <div class="chart-tech-card">
-              <div class="chart-tech-title">Daily Revenue Share · All Bays</div>
-              <canvas id="pieDaily"></canvas>
-            </div>
-            <div class="chart-tech-card">
-              <div class="chart-tech-title">Monthly Revenue Share · All Bays</div>
-              <canvas id="pieMonthly"></canvas>
-            </div>
             <div class="chart-tech-card full">
               <div class="chart-tech-title">Hybrid Revenue Grid · Daily Standard Bays + Monthly All Bays</div>
               <canvas id="mixedChart" height="100"></canvas>
+            </div>
+            <div class="chart-tech-card pie-view">
+              <div class="chart-tech-title">Daily Revenue Share · All Bays</div>
+              <canvas id="pieDaily"></canvas>
+            </div>
+            <div class="chart-tech-card pie-view">
+              <div class="chart-tech-title">Monthly Revenue Share · All Bays</div>
+              <canvas id="pieMonthly"></canvas>
             </div>
           </div>
         </div>

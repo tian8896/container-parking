@@ -2764,6 +2764,38 @@ function chartCommonOptions(extra) {
   }
   return merge(base, extra);
 }
+function chartPieOptions(extra) {
+  var base = chartCommonOptions({
+    aspectRatio: 1.32,
+    cutout: '62%',
+    radius: '76%',
+    layout: { padding: 4 },
+    plugins: {
+      legend: {
+        position: 'right',
+        labels: {
+          padding: 10,
+          boxWidth: 10,
+          boxHeight: 10,
+          font: { size: 11, weight: 'bold' }
+        }
+      }
+    }
+  });
+  if (!extra) return base;
+  function merge(target, source) {
+    Object.keys(source).forEach(function(k) {
+      if (source[k] && typeof source[k] === 'object' && !Array.isArray(source[k])) {
+        if (!target[k] || typeof target[k] !== 'object') target[k] = {};
+        merge(target[k], source[k]);
+      } else {
+        target[k] = source[k];
+      }
+    });
+    return target;
+  }
+  return merge(base, extra);
+}
 var chartGlowPlugin = {
   id: 'chartGlowPlugin',
   beforeDatasetsDraw: function(chart) {
@@ -2962,9 +2994,8 @@ function renderMonthlyCharts(doneRecs, allBays) {
             hoverOffset: 10
           }]
         },
-        options: chartCommonOptions({
+        options: chartPieOptions({
           plugins: {
-            legend: { position: 'right' },
             tooltip: {
               callbacks: {
                 label: function(ctx) {
@@ -3021,9 +3052,8 @@ function renderMonthlyCharts(doneRecs, allBays) {
             hoverOffset: 10
           }]
         },
-        options: chartCommonOptions({
+        options: chartPieOptions({
           plugins: {
-            legend: { position: 'right' },
             tooltip: {
               callbacks: {
                 label: function(ctx) {
