@@ -155,17 +155,17 @@ mix-blend-mode:screen;pointer-events:none}
 .monthly-board-title h3{font-size:15px;color:#113f63;letter-spacing:1.8px;text-transform:uppercase;text-shadow:none}
 .monthly-board-title span{font-size:11px;color:#4588b4;letter-spacing:1.4px;text-transform:uppercase;text-shadow:none}
 .bay-neon-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
-.bay-neon-card{position:relative;overflow:hidden;border-radius:16px;padding:16px 16px 14px;border:1px solid rgba(93,203,255,.2);background:linear-gradient(180deg,rgba(255,255,255,.58),rgba(228,244,255,.8));min-height:176px}
+.bay-neon-card{position:relative;overflow:hidden;border-radius:16px;padding:16px 16px 14px;border:1px solid rgba(93,203,255,.2);background:linear-gradient(180deg,rgba(255,255,255,.58),rgba(228,244,255,.8));min-height:176px;font-family:Arial,sans-serif;color:#000}
 .bay-neon-card::before{content:'';position:absolute;left:-18%;top:-34%;width:160px;height:160px;background:radial-gradient(circle,rgba(72,209,255,.22),transparent 68%);opacity:.85}
 .bay-neon-card::after{content:'';position:absolute;inset:10px;border:1px solid rgba(90,206,255,.08);border-radius:12px;pointer-events:none}
 .bay-neon-card.occupied{border-color:rgba(255,170,62,.5);box-shadow:0 0 0 1px rgba(255,175,77,.12),0 0 26px rgba(255,157,0,.1),inset 0 0 18px rgba(255,144,0,.06)}
 .bay-neon-card.available{border-color:rgba(84,224,255,.32);box-shadow:0 0 0 1px rgba(82,219,255,.08),0 0 28px rgba(23,156,255,.08),inset 0 0 20px rgba(22,184,255,.06)}
-.bay-neon-card .bay-id{position:relative;font-size:24px;font-weight:bold;color:#123f61;letter-spacing:1px;text-shadow:none}
-.bay-neon-card .bay-status{position:relative;display:inline-flex;align-items:center;gap:6px;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;margin-top:8px;padding:5px 10px;border-radius:999px}
-.bay-neon-card.occupied .bay-status{background:rgba(255,164,54,.12);color:#ffbe66;border:1px solid rgba(255,190,102,.2)}
-.bay-neon-card.available .bay-status{background:rgba(52,199,255,.1);color:#7fe6ff;border:1px solid rgba(71,214,255,.18)}
-.bay-neon-card .bay-meta{position:relative;margin-top:14px;font-size:13px;color:#496e8d;line-height:1.7;text-shadow:none}
-.bay-neon-card .bay-meta strong{color:#143f62}
+.bay-neon-card .bay-id{position:relative;font-size:24px;font-weight:bold;color:#000;letter-spacing:1px;text-shadow:none}
+.bay-neon-card .bay-status{position:relative;display:inline-flex;align-items:center;gap:6px;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;margin-top:8px;padding:5px 10px;border-radius:999px;color:#000}
+.bay-neon-card.occupied .bay-status{background:rgba(255,164,54,.12);color:#000;border:1px solid rgba(255,190,102,.2)}
+.bay-neon-card.available .bay-status{background:rgba(52,199,255,.1);color:#000;border:1px solid rgba(71,214,255,.18)}
+.bay-neon-card .bay-meta{position:relative;margin-top:14px;font-size:13px;color:#000;line-height:1.7;text-shadow:none}
+.bay-neon-card .bay-meta strong{color:#000}
 .bay-mini-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .bay-mini-panel{border:1px solid rgba(78,193,255,.18);border-radius:16px;padding:14px;background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(229,245,255,.82));box-shadow:inset 0 0 14px rgba(42,179,255,.03)}
 .bay-mini-panel h4{font-size:11px;color:#3c82b0;letter-spacing:1.8px;text-transform:uppercase;margin-bottom:10px;text-shadow:none}
