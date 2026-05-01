@@ -471,9 +471,9 @@ function initApp() {
         if (r.fee !== newFee) { r.fee = newFee; saveToFirebase(r.id, r); }
       }
     });
+    initMSel();
     renderAll();
     updStats();
-    initMSel();
     renderMS();
   }, function(err) { toast('Firebase error: ' + err.message, 'err'); });
 
@@ -1277,9 +1277,9 @@ function initApp() {
       }
     });
     
+    initMSel();
     renderAll();
     updStats();
-    initMSel();
     renderMS();
   }, function(err) {
     toast('Firebase error: ' + err.message, 'err');
@@ -2037,6 +2037,7 @@ function swTab(tab) {
   if (tab === 'records') renderAllRecs();
   if (tab === 'active') renderActRecs();
   if (tab === 'sres') renderSRes();
+  if (tab === 'monthly') renderMS();
 }
 
 // ============================================================
@@ -2511,10 +2512,17 @@ function updStats() {
 
 function initMSel() {
   var m = {};
+  var completedMonths = {};
   recs.forEach(function(r) {
     var d = new Date(r.arr);
     var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
     m[key] = true;
+    if (r.dep) {
+      var dep = new Date(r.dep);
+      var depKey = dep.getFullYear() + '-' + String(dep.getMonth() + 1).padStart(2, '0');
+      m[depKey] = true;
+      completedMonths[depKey] = true;
+    }
   });
   
   var now = new Date();
@@ -2524,12 +2532,19 @@ function initMSel() {
   var keys = Object.keys(m).sort().reverse();
   var sel = gid('msel');
   if (!sel) return;
+  var previous = sel.value;
   
   sel.innerHTML = keys.map(function(k) {
     var y = k.split('-')[0];
     var mo = k.split('-')[1];
     return '<option value="' + k + '">' + y + '年' + parseInt(mo) + '月</option>';
   }).join('');
+  if (keys.indexOf(previous) !== -1) {
+    sel.value = previous;
+  } else {
+    var completedKeys = Object.keys(completedMonths).sort().reverse();
+    sel.value = completedKeys[0] || cur || keys[0] || '';
+  }
   sel.onchange = function() { renderMS(); };
 }
 
@@ -2538,6 +2553,7 @@ function renderMS() {
   if (!sel) return;
   
   var month = sel.value;
+  if (!month) return;
   var parts = month.split('-').map(Number);
   var year = parts[0];
   var mon = parts[1];
