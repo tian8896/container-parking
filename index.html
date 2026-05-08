@@ -569,6 +569,8 @@ document.ontouchend = function() {
     <div class="hstat"><div class="v" id="s-active">0</div><div class="l">当前在位 Active</div></div>
     <div class="hstat"><div class="v" id="s-rev">0</div><div class="l">总收益 AED Total</div></div>
     <div class="hstat"><div class="v" id="s-mrev">0</div><div class="l">本月收益 AED Monthly</div></div>
+    <div class="hstat"><div class="v" id="s-other-rev">0</div><div class="l">其他收益 AED Other</div></div>
+    <div class="hstat"><div class="v" id="s-other-mrev">0</div><div class="l">本月其他收益 Other Monthly</div></div>
   </div>
 </header>
 <div class="main">
@@ -682,7 +684,8 @@ document.ontouchend = function() {
 
         <div class="monthly-metrics">
           <div class="monthly-metric"><div class="lab">Stays</div><div class="num" id="mc-c">0</div><div class="sub">本月完成停靠次数</div></div>
-          <div class="monthly-metric"><div class="lab">Revenue</div><div class="num" id="mc-r">0</div><div class="sub">本月出场收入 AED</div></div>
+          <div class="monthly-metric"><div class="lab">Revenue</div><div class="num" id="mc-r">0</div><div class="sub">80/81/83/84/85 本月收入 AED</div></div>
+          <div class="monthly-metric"><div class="lab">Other Revenue</div><div class="num" id="mc-other-r">0</div><div class="sub">其他车位本月收入 AED</div></div>
           <div class="monthly-metric"><div class="lab">Total Days</div><div class="num" id="mc-d">0</div><div class="sub">累计停靠天数</div></div>
           <div class="monthly-metric"><div class="lab">Used Bays</div><div class="num" id="mc-used-bays">0</div><div class="sub">本月发生过停靠的车位</div></div>
           <div class="monthly-metric"><div class="lab">Occupied Now</div><div class="num" id="mc-occ-now">0</div><div class="sub">当前仍在场的车位</div></div>
@@ -766,19 +769,19 @@ document.ontouchend = function() {
               <canvas id="barChart"></canvas>
             </div>
             <div class="chart-tech-card">
-              <div class="chart-tech-title">Other Bays · Monthly Revenue Trend</div>
+              <div class="chart-tech-title">其他收益 · Monthly Revenue Trend</div>
               <canvas id="lineChart"></canvas>
             </div>
             <div class="chart-tech-card full">
-              <div class="chart-tech-title">Hybrid Revenue Grid · Daily Standard Bays + Monthly All Bays</div>
+              <div class="chart-tech-title">Hybrid Revenue Grid · Daily 80/81/83/84/85 + Monthly Other</div>
               <canvas id="mixedChart" height="100"></canvas>
             </div>
             <div class="chart-tech-card pie-view">
-              <div class="chart-tech-title">Daily Revenue Share · All Bays</div>
+              <div class="chart-tech-title">Daily Revenue Share · 80/81/83/84/85 + Other</div>
               <canvas id="pieDaily"></canvas>
             </div>
             <div class="chart-tech-card pie-view">
-              <div class="chart-tech-title">Monthly Revenue Share · All Bays</div>
+              <div class="chart-tech-title">Monthly Revenue Share · 80/81/83/84/85 + Other</div>
               <canvas id="pieMonthly"></canvas>
             </div>
           </div>
@@ -846,6 +849,6 @@ document.ontouchend = function() {
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><script src="app.js?v=26"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><script src="app.js?v=27"></script>
 </body>
 </html>

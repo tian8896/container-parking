@@ -19,6 +19,7 @@ const STORAGE_KEY = 'cpms_bays';
 const LOGIN_KEY = 'cpms_logged_in';
 const USERS_KEY = 'cpms_users';
 const RATE_KEY = 'cpms_bay_rates';
+var PRIMARY_REVENUE_BAYS = [80, 81, 83, 84, 85];
 
 // Firebase Auth state
 var firebaseAuthReady = false;
@@ -2496,10 +2497,19 @@ function qoOut(cn) {
 function updStats() {
   var tot = recs.length;
   var act = recs.filter(function(r) { return !r.dep; }).length;
-  var rev = recs.reduce(function(s, r) { return s + (r.fee || 0); }, 0);
+  var completed = recs.filter(function(r) { return !!r.dep; });
+  var rev = completed.filter(function(r) { return isPrimaryRevenueBay(r.bay); }).reduce(function(s, r) { return s + (r.fee || 0); }, 0);
+  var otherRev = completed.filter(function(r) { return !isPrimaryRevenueBay(r.bay); }).reduce(function(s, r) { return s + (r.fee || 0); }, 0);
   var now = new Date();
   var mrev = recs.filter(function(r) {
     if (!r.dep) return false;
+    if (!isPrimaryRevenueBay(r.bay)) return false;
+    var d = new Date(r.dep);
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  }).reduce(function(s, r) { return s + (r.fee || 0); }, 0);
+  var motherRev = recs.filter(function(r) {
+    if (!r.dep) return false;
+    if (isPrimaryRevenueBay(r.bay)) return false;
     var d = new Date(r.dep);
     return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
   }).reduce(function(s, r) { return s + (r.fee || 0); }, 0);
@@ -2508,6 +2518,10 @@ function updStats() {
   gid('s-active').textContent = act;
   gid('s-rev').textContent = rev.toLocaleString();
   gid('s-mrev').textContent = mrev.toLocaleString();
+  var otherEl = gid('s-other-rev');
+  var monthOtherEl = gid('s-other-mrev');
+  if (otherEl) otherEl.textContent = otherRev.toLocaleString();
+  if (monthOtherEl) monthOtherEl.textContent = motherRev.toLocaleString();
 }
 
 function initMSel() {
@@ -2564,8 +2578,11 @@ function renderMS() {
     return d.getFullYear() === year && d.getMonth() + 1 === mon;
   });
   
+  var primaryDone = done.filter(function(r) { return isPrimaryRevenueBay(r.bay); });
+  var otherDone = done.filter(function(r) { return !isPrimaryRevenueBay(r.bay); });
   var totalCount = done.length;
-  var totalRev = done.reduce(function(s, r) { return s + (r.fee || 0); }, 0);
+  var totalRev = primaryDone.reduce(function(s, r) { return s + (r.fee || 0); }, 0);
+  var otherRev = otherDone.reduce(function(s, r) { return s + (r.fee || 0); }, 0);
   var totalDays = done.reduce(function(s, r) { return s + calcDur(r.arr, r.dep).dd; }, 0);
   var selectedLabel = gid('monthly-selected-label');
   
@@ -2579,6 +2596,8 @@ function renderMS() {
   mc.textContent = totalCount;
   mr.textContent = totalRev.toLocaleString();
   md.textContent = Math.round(totalDays);
+  var mor = gid('mc-other-r');
+  if (mor) mor.textContent = otherRev.toLocaleString();
   if (selectedLabel) selectedLabel.textContent = year + '.' + String(mon).padStart(2, '0');
 
   var monthUsedBaysMap = {};
@@ -2624,7 +2643,7 @@ function renderMS() {
   renderBayTags('monthly-occupied-tags', occupiedNowBays, 'occupied');
   renderBayTags('monthly-available-tags', availableNowBays, 'available');
 
-  var bayStats = BAYS.map(function(bayId) {
+  var bayStats = PRIMARY_REVENUE_BAYS.map(function(bayId) {
     var bayDone = done.filter(function(r) { return r.bay === bayId; });
     var bayRevenue = bayDone.reduce(function(s, r) { return s + (r.fee || 0); }, 0);
     var bayDays = bayDone.reduce(function(s, r) { return s + calcDur(r.arr, r.dep).dd; }, 0);
@@ -2685,15 +2704,19 @@ function renderMS() {
     }).join('');
   }
   
-  grid.innerHTML = BAYS.map(function(bayId) {
+  var revenueCards = PRIMARY_REVENUE_BAYS.map(function(bayId) {
     var br = done.filter(function(r) { return r.bay === bayId; });
     var bc = br.length;
     var brv = br.reduce(function(s, r) { return s + (r.fee || 0); }, 0);
     var bd = br.reduce(function(s, r) { return s + calcDur(r.arr, r.dep).dd; }, 0);
-    var occu = totalCount > 0 ? Math.round(bc / totalCount * 100) : 0;
+    var occu = primaryDone.length > 0 ? Math.round(bc / primaryDone.length * 100) : 0;
     
     return '<div class="scard"><div class="sch"><div class="scbay">Bay #' + bayId + '</div><div class="scocc">' + occu + '%</div></div><div class="sr"><span class="sl">停放次数</span><span class="sv">' + bc + '</span></div><div class="sr"><span class="sl">总天数</span><span class="sv">' + Math.round(bd) + '天</span></div><div class="sr"><span class="sl">收入</span><span class="sv">' + brv.toLocaleString() + ' AED</span></div></div>';
-  }).join('');
+  });
+  var otherDays = otherDone.reduce(function(s, r) { return s + calcDur(r.arr, r.dep).dd; }, 0);
+  var otherOccu = done.length > 0 ? Math.round(otherDone.length / done.length * 100) : 0;
+  revenueCards.push('<div class="scard"><div class="sch"><div class="scbay">其他收益</div><div class="scocc">' + otherOccu + '%</div></div><div class="sr"><span class="sl">停放次数</span><span class="sv">' + otherDone.length + '</span></div><div class="sr"><span class="sl">总天数</span><span class="sv">' + Math.round(otherDays) + '天</span></div><div class="sr"><span class="sl">收入</span><span class="sv">' + otherRev.toLocaleString() + ' AED</span></div></div>');
+  grid.innerHTML = revenueCards.join('');
   
   // Render monthly charts
   renderMonthlyCharts(done, BAYS);
@@ -2707,7 +2730,7 @@ var chartBar = null, chartLine = null, chartPieDaily = null, chartPieMonthly = n
 var CHART_COLORS = ['#2dd4ff','#7c4dff','#00e5a8','#ffb020','#ff5c93','#00c2ff','#8cff66','#ff7b72','#40c4ff','#9b7dff'];
 var CHART_FILL_COLORS = ['rgba(45,212,255,.35)','rgba(124,77,255,.28)','rgba(0,229,168,.28)','rgba(255,176,32,.28)','rgba(255,92,147,.28)','rgba(0,194,255,.28)','rgba(140,255,102,.22)','rgba(255,123,114,.24)','rgba(64,196,255,.24)','rgba(155,125,255,.24)'];
 
-var STANDARD_BAYS = [80, 81, 83, 84, 85];
+var STANDARD_BAYS = PRIMARY_REVENUE_BAYS.slice();
 
 function getChartCanvas(id) {
   return document.getElementById(id);
@@ -2828,7 +2851,11 @@ var chartGlowPlugin = {
 };
 
 function isStandardBay(bayId) {
-  return STANDARD_BAYS.indexOf(bayId) !== -1;
+  return STANDARD_BAYS.indexOf(Number(bayId)) !== -1;
+}
+
+function isPrimaryRevenueBay(bayId) {
+  return PRIMARY_REVENUE_BAYS.indexOf(Number(bayId)) !== -1;
 }
 
 function renderMonthlyCharts(doneRecs, allBays) {
@@ -2909,30 +2936,30 @@ function renderMonthlyCharts(doneRecs, allBays) {
     });
   }
   
-  // === Line Chart: Other bays (not 80/81/83/84/85) ===
+  // === Line Chart: Other bays (not 80/81/83/84/85), grouped as other revenue ===
   var otherBays = allBays.filter(function(b) { return !isStandardBay(b); });
   
   if (chartLine) chartLine.destroy();
   
   if (monthKeys.length > 0 && otherBays.length > 0) {
     var lineCanvas = getChartCanvas('lineChart');
-    var lineDatasets = otherBays.map(function(bayId, i) {
-      return {
-        label: 'Bay ' + bayId,
-        data: monthKeys.map(function(mk) {
-          return (allMonths[mk] && allMonths[mk][String(bayId)]) ? allMonths[mk][String(bayId)] : 0;
-        }),
-        borderColor: CHART_COLORS[(i + 5) % CHART_COLORS.length],
-        backgroundColor: makeLinearGradient(lineCanvas, CHART_FILL_COLORS[(i + 5) % CHART_FILL_COLORS.length], 'rgba(255,255,255,.02)'),
-        fill: true,
-        tension: 0.42,
-        pointBackgroundColor: CHART_COLORS[(i + 5) % CHART_COLORS.length],
-        pointBorderColor: '#ffffff',
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 7
-      };
-    });
+    var lineDatasets = [{
+      label: '其他收益',
+      data: monthKeys.map(function(mk) {
+        return otherBays.reduce(function(sum, bayId) {
+          return sum + ((allMonths[mk] && allMonths[mk][String(bayId)]) ? allMonths[mk][String(bayId)] : 0);
+        }, 0);
+      }),
+      borderColor: CHART_COLORS[5],
+      backgroundColor: makeLinearGradient(lineCanvas, CHART_FILL_COLORS[5], 'rgba(255,255,255,.02)'),
+      fill: true,
+      tension: 0.42,
+      pointBackgroundColor: CHART_COLORS[5],
+      pointBorderColor: '#ffffff',
+      pointBorderWidth: 2,
+      pointRadius: 4,
+      pointHoverRadius: 7
+    }];
     
     chartLine = new Chart(lineCanvas, {
       type: 'line',
@@ -2955,8 +2982,8 @@ function renderMonthlyCharts(doneRecs, allBays) {
     });
   }
   
-  // === Pie Chart: Daily revenue share (all bays) ===
-  // Collect daily revenue per ALL bays
+  // === Pie Chart: Daily revenue share (standard bays + other revenue) ===
+  // Collect daily revenue per bay, then group non-standard bays together
   var allDaysAllBays = {};
   doneRecs.forEach(function(r) {
     if (!r.dep) return;
@@ -2973,13 +3000,18 @@ function renderMonthlyCharts(doneRecs, allBays) {
   if (chartPieDaily) chartPieDaily.destroy();
 
   if (dayKeysAll.length > 0) {
-    // Calculate total revenue per bay across all days
+    // Calculate total revenue per standard bay plus grouped other revenue across all days
     var bayTotalsDaily = {};
-    allBays.forEach(function(bayId) { bayTotalsDaily[bayId] = 0; });
+    standardBays.forEach(function(bayId) { bayTotalsDaily[bayId] = 0; });
+    var otherTotalDaily = 0;
     dayKeysAll.forEach(function(dk) {
       allBays.forEach(function(bayId) {
         if (allDaysAllBays[dk][String(bayId)]) {
-          bayTotalsDaily[bayId] += allDaysAllBays[dk][String(bayId)];
+          if (isStandardBay(bayId)) {
+            bayTotalsDaily[bayId] += allDaysAllBays[dk][String(bayId)];
+          } else {
+            otherTotalDaily += allDaysAllBays[dk][String(bayId)];
+          }
         }
       });
     });
@@ -2987,12 +3019,16 @@ function renderMonthlyCharts(doneRecs, allBays) {
     // Filter out bays with 0 revenue
     var pieDailyLabels = [];
     var pieDailyData = [];
-    allBays.forEach(function(bayId, i) {
+    standardBays.forEach(function(bayId, i) {
       if (bayTotalsDaily[bayId] > 0) {
         pieDailyLabels.push('Bay ' + bayId);
         pieDailyData.push(bayTotalsDaily[bayId]);
       }
     });
+    if (otherTotalDaily > 0) {
+      pieDailyLabels.push('其他收益');
+      pieDailyData.push(otherTotalDaily);
+    }
 
     if (pieDailyData.length > 0) {
       var pieDailyCanvas = getChartCanvas('pieDaily');
@@ -3027,17 +3063,22 @@ function renderMonthlyCharts(doneRecs, allBays) {
     }
   }
 
-  // === Pie Chart: Monthly revenue share (all bays) ===
+  // === Pie Chart: Monthly revenue share (standard bays + other revenue) ===
   if (chartPieMonthly) chartPieMonthly.destroy();
 
   if (monthKeys.length > 0) {
-    // Calculate total revenue per bay across all months
+    // Calculate total revenue per standard bay plus grouped other revenue across all months
     var bayTotalsMonthly = {};
-    allBays.forEach(function(bayId) { bayTotalsMonthly[bayId] = 0; });
+    standardBays.forEach(function(bayId) { bayTotalsMonthly[bayId] = 0; });
+    var otherTotalMonthly = 0;
     monthKeys.forEach(function(mk) {
       allBays.forEach(function(bayId) {
         if (allMonths[mk][String(bayId)]) {
-          bayTotalsMonthly[bayId] += allMonths[mk][String(bayId)];
+          if (isStandardBay(bayId)) {
+            bayTotalsMonthly[bayId] += allMonths[mk][String(bayId)];
+          } else {
+            otherTotalMonthly += allMonths[mk][String(bayId)];
+          }
         }
       });
     });
@@ -3045,12 +3086,16 @@ function renderMonthlyCharts(doneRecs, allBays) {
     // Filter out bays with 0 revenue
     var pieMonthlyLabels = [];
     var pieMonthlyData = [];
-    allBays.forEach(function(bayId, i) {
+    standardBays.forEach(function(bayId, i) {
       if (bayTotalsMonthly[bayId] > 0) {
         pieMonthlyLabels.push('Bay ' + bayId);
         pieMonthlyData.push(bayTotalsMonthly[bayId]);
       }
     });
+    if (otherTotalMonthly > 0) {
+      pieMonthlyLabels.push('其他收益');
+      pieMonthlyData.push(otherTotalMonthly);
+    }
 
     if (pieMonthlyData.length > 0) {
       var pieMonthlyCanvas = getChartCanvas('pieMonthly');
@@ -3103,14 +3148,14 @@ function renderMonthlyCharts(doneRecs, allBays) {
 
   var mixedDayKeys = Object.keys(mixedDays).sort();
 
-  // Collect monthly revenue per bay (for bar)
+  // Collect monthly revenue per standard bay plus grouped other revenue (for bar)
   var mixedMonths = {};
   doneRecs.forEach(function(r) {
     if (!r.dep) return;
     var d = new Date(r.dep);
     var key = d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0');
     if (!mixedMonths[key]) mixedMonths[key] = {};
-    var bayKey = String(r.bay);
+    var bayKey = isStandardBay(r.bay) ? String(r.bay) : 'other';
     if (!mixedMonths[key][bayKey]) mixedMonths[key][bayKey] = 0;
     mixedMonths[key][bayKey] += (r.fee || 0);
   });
@@ -3146,15 +3191,19 @@ function renderMonthlyCharts(doneRecs, allBays) {
       };
     });
 
-    // Bar datasets: monthly revenue per bay (only for monthly labels)
-    var barDatasets = allBays.map(function(bayId, i) {
+    // Bar datasets: monthly revenue for 80/81/83/84/85 and grouped other revenue
+    var monthlySeries = standardBays.map(function(bayId) {
+      return { key: String(bayId), label: 'Bay ' + bayId + ' (Monthly)' };
+    });
+    monthlySeries.push({ key: 'other', label: '其他收益 (Monthly)' });
+    var barDatasets = monthlySeries.map(function(series, i) {
       return {
         type: 'bar',
-        label: 'Bay ' + bayId + ' (Monthly)',
+        label: series.label,
         data: allLabels.map(function(label) {
           // Only show data for monthly labels
           if (mixedMonthKeys.indexOf(label) !== -1) {
-            return (mixedMonths[label] && mixedMonths[label][String(bayId)]) ? mixedMonths[label][String(bayId)] : 0;
+            return (mixedMonths[label] && mixedMonths[label][series.key]) ? mixedMonths[label][series.key] : 0;
           }
           return 0;
         }),
